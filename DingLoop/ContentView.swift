@@ -42,6 +42,7 @@ private enum AppLanguage {
 }
 
 struct ContentView: View {
+    @Environment(\.openURL) private var openURL
     @StateObject private var viewModel = AlarmViewModel()
     @State private var isInfoPresented = false
     @State private var selectedLanguage: AppLanguage = .korean
@@ -49,6 +50,7 @@ struct ContentView: View {
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
+    private let legalPageURL = URL(string: "https://gotgam100.github.io/dingloop/")!
 
     var body: some View {
         ZStack {
@@ -218,7 +220,7 @@ struct ContentView: View {
 
     private func linkRow(_ title: String) -> some View {
         Button {
-            // Link destination intentionally left empty for now.
+            openURL(legalPageURL)
         } label: {
             HStack {
                 Text(title)
