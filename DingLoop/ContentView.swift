@@ -50,7 +50,7 @@ struct ContentView: View {
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
-    private let legalPageURL = URL(string: "https://gotgam100.github.io/dingloop/")!
+    private let legalPageURL = URL(string: "https://gotgam100.github.io/dingloop/index.html")!
 
     var body: some View {
         ZStack {
@@ -220,7 +220,12 @@ struct ContentView: View {
 
     private func linkRow(_ title: String) -> some View {
         Button {
-            openURL(legalPageURL)
+            guard var components = URLComponents(url: legalPageURL, resolvingAgainstBaseURL: false) else {
+                openURL(legalPageURL)
+                return
+            }
+            components.fragment = selectedLanguage == .korean ? "ko" : "en"
+            openURL(components.url ?? legalPageURL)
         } label: {
             HStack {
                 Text(title)

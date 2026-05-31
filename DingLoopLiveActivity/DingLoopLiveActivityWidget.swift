@@ -69,24 +69,11 @@ private struct LockScreenLiveActivityView: View {
         let accent = dingActivityAccentColor(for: context.attributes.accentName)
 
         HStack(spacing: 0) {
-            HStack(spacing: 14) {
-                ZStack {
-                    Circle()
-                        .stroke(.white.opacity(0.12), lineWidth: 8)
-                    Circle()
-                        .trim(from: 0, to: 0.74)
-                        .stroke(accent, style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                    Circle()
-                        .fill(accent)
-                        .frame(width: 14, height: 14)
-                }
-                .frame(width: 58, height: 58)
-
-                Text("\(context.attributes.intervalMinutes) min")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.58))
-            }
+            Text("\(context.attributes.intervalMinutes) min")
+                .font(.title2.monospacedDigit().weight(.heavy))
+                .foregroundStyle(.white.opacity(0.9))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
 
             Spacer(minLength: 34)
 
