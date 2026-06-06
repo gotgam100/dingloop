@@ -18,6 +18,10 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>DingLoop uses alarms to play interval alerts even when your iPhone is locked or Focus mode is enabled.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>DingLoop uses the microphone so you can record a short voice alarm in Live Mode.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIAppFonts</key>

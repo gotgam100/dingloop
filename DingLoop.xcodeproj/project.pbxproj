@@ -10,12 +10,7 @@
 		AA0010010000000000000001 /* DingLoopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020010000000000000001 /* DingLoopApp.swift */; };
 		AA0010020000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020020000000000000001 /* ContentView.swift */; };
 		AA0010030000000000000001 /* AlarmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020030000000000000001 /* AlarmViewModel.swift */; };
-		AA0010040000000000000001 /* PhoneWatchSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020040000000000000001 /* PhoneWatchSync.swift */; };
 		AA0010050000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0020050000000000000001 /* Assets.xcassets */; };
-		AA0010060000000000000001 /* DingLoopWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0021010000000000000001 /* DingLoopWatchApp.swift */; };
-		AA0010070000000000000001 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0021020000000000000001 /* WatchContentView.swift */; };
-		AA0010080000000000000001 /* WatchAlarmViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0021030000000000000001 /* WatchAlarmViewModel.swift */; };
-		AA0010090000000000000001 /* WatchConnectivityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0021040000000000000001 /* WatchConnectivityBridge.swift */; };
 		AA00100A0000000000000001 /* DingLoopActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020070000000000000001 /* DingLoopActivityAttributes.swift */; };
 		AA00100B0000000000000001 /* LiveActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020080000000000000001 /* LiveActivityController.swift */; };
 		AA0011010000000000000001 /* Paperlogy-4Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA0023010000000000000001 /* Paperlogy-4Regular.ttf */; };
@@ -26,6 +21,9 @@
 		AA0012010000000000000001 /* ding-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024010000000000000001 /* ding-tone.caf */; };
 		AA0012020000000000000001 /* pop-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024020000000000000001 /* pop-tone.caf */; };
 		AA0012030000000000000001 /* chime-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024030000000000000001 /* chime-tone.caf */; };
+		AA0012040000000000000001 /* ding-tone-alarmkit.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024040000000000000001 /* ding-tone-alarmkit.caf */; };
+		AA0012050000000000000001 /* pop-tone-alarmkit.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024050000000000000001 /* pop-tone-alarmkit.caf */; };
+		AA0012060000000000000001 /* chime-tone-alarmkit.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024060000000000000001 /* chime-tone-alarmkit.caf */; };
 		AA0013010000000000000001 /* DingLoopLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0025010000000000000001 /* DingLoopLiveActivityBundle.swift */; };
 		AA0013020000000000000001 /* DingLoopLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0025020000000000000001 /* DingLoopLiveActivityWidget.swift */; };
 		AA0013030000000000000001 /* DingLoopActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020070000000000000001 /* DingLoopActivityAttributes.swift */; };
@@ -60,19 +58,12 @@
 		AA0020010000000000000001 /* DingLoopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopApp.swift; sourceTree = "<group>"; };
 		AA0020020000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA0020030000000000000001 /* AlarmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmViewModel.swift; sourceTree = "<group>"; };
-		AA0020040000000000000001 /* PhoneWatchSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWatchSync.swift; sourceTree = "<group>"; };
 		AA0020050000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0020060000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0020070000000000000001 /* DingLoopActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopActivityAttributes.swift; sourceTree = "<group>"; };
 		AA0020080000000000000001 /* LiveActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityController.swift; sourceTree = "<group>"; };
-		AA0021010000000000000001 /* DingLoopWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopWatchApp.swift; sourceTree = "<group>"; };
-		AA0021020000000000000001 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
-		AA0021030000000000000001 /* WatchAlarmViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAlarmViewModel.swift; sourceTree = "<group>"; };
-		AA0021040000000000000001 /* WatchConnectivityBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityBridge.swift; sourceTree = "<group>"; };
-		AA0021050000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AA0021060000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AA0022010000000000000001 /* DingLoop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DingLoop.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA0022020000000000000001 /* DingLoop Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DingLoop Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0020090000000000000001 /* DingLoop.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DingLoop.entitlements; sourceTree = "<group>"; };
+		AA0022010000000000000001 /* DingLoop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DingLoop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0022030000000000000001 /* DingLoopLiveActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DingLoopLiveActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0023010000000000000001 /* Paperlogy-4Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Paperlogy-4Regular.ttf"; sourceTree = "<group>"; };
 		AA0023020000000000000001 /* Paperlogy-5Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Paperlogy-5Medium.ttf"; sourceTree = "<group>"; };
@@ -82,20 +73,17 @@
 		AA0024010000000000000001 /* ding-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ding-tone.caf"; sourceTree = "<group>"; };
 		AA0024020000000000000001 /* pop-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "pop-tone.caf"; sourceTree = "<group>"; };
 		AA0024030000000000000001 /* chime-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "chime-tone.caf"; sourceTree = "<group>"; };
+		AA0024040000000000000001 /* ding-tone-alarmkit.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ding-tone-alarmkit.caf"; sourceTree = "<group>"; };
+		AA0024050000000000000001 /* pop-tone-alarmkit.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "pop-tone-alarmkit.caf"; sourceTree = "<group>"; };
+		AA0024060000000000000001 /* chime-tone-alarmkit.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "chime-tone-alarmkit.caf"; sourceTree = "<group>"; };
 		AA0025010000000000000001 /* DingLoopLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopLiveActivityBundle.swift; sourceTree = "<group>"; };
 		AA0025020000000000000001 /* DingLoopLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopLiveActivityWidget.swift; sourceTree = "<group>"; };
 		AA0025030000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA0025040000000000000001 /* DingLoopLiveActivityExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DingLoopLiveActivityExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA0060020000000000000001 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AA0061020000000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -117,7 +105,6 @@
 			children = (
 				AA0070020000000000000001 /* DingLoop */,
 				AA0070050000000000000001 /* Fonts */,
-				AA0070030000000000000001 /* DingLoopWatch Watch App */,
 				AA0070070000000000000001 /* DingLoopLiveActivity */,
 				AA0070040000000000000001 /* Products */,
 			);
@@ -129,34 +116,20 @@
 				AA0020010000000000000001 /* DingLoopApp.swift */,
 				AA0020020000000000000001 /* ContentView.swift */,
 				AA0020030000000000000001 /* AlarmViewModel.swift */,
-				AA0020040000000000000001 /* PhoneWatchSync.swift */,
 				AA0020070000000000000001 /* DingLoopActivityAttributes.swift */,
 				AA0020080000000000000001 /* LiveActivityController.swift */,
 				AA0020050000000000000001 /* Assets.xcassets */,
 				AA0070060000000000000001 /* Sounds */,
+				AA0020090000000000000001 /* DingLoop.entitlements */,
 				AA0020060000000000000001 /* Info.plist */,
 			);
 			path = DingLoop;
-			sourceTree = "<group>";
-		};
-		AA0070030000000000000001 /* DingLoopWatch Watch App */ = {
-			isa = PBXGroup;
-			children = (
-				AA0021010000000000000001 /* DingLoopWatchApp.swift */,
-				AA0021020000000000000001 /* WatchContentView.swift */,
-				AA0021030000000000000001 /* WatchAlarmViewModel.swift */,
-				AA0021040000000000000001 /* WatchConnectivityBridge.swift */,
-				AA0021060000000000000001 /* Assets.xcassets */,
-				AA0021050000000000000001 /* Info.plist */,
-			);
-			path = "DingLoopWatch Watch App";
 			sourceTree = "<group>";
 		};
 		AA0070040000000000000001 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				AA0022010000000000000001 /* DingLoop.app */,
-				AA0022020000000000000001 /* DingLoop Watch App.app */,
 				AA0022030000000000000001 /* DingLoopLiveActivityExtension.appex */,
 			);
 			name = Products;
@@ -180,6 +153,9 @@
 				AA0024010000000000000001 /* ding-tone.caf */,
 				AA0024020000000000000001 /* pop-tone.caf */,
 				AA0024030000000000000001 /* chime-tone.caf */,
+				AA0024040000000000000001 /* ding-tone-alarmkit.caf */,
+				AA0024050000000000000001 /* pop-tone-alarmkit.caf */,
+				AA0024060000000000000001 /* chime-tone-alarmkit.caf */,
 			);
 			path = Sounds;
 			sourceTree = "<group>";
@@ -189,6 +165,7 @@
 			children = (
 				AA0025010000000000000001 /* DingLoopLiveActivityBundle.swift */,
 				AA0025020000000000000001 /* DingLoopLiveActivityWidget.swift */,
+				AA0025040000000000000001 /* DingLoopLiveActivityExtension.entitlements */,
 				AA0025030000000000000001 /* Info.plist */,
 			);
 			path = DingLoopLiveActivity;
@@ -211,26 +188,9 @@
 			dependencies = (
 				AA0030020000000000000001 /* PBXTargetDependency */,
 			);
-			name = "DingLoop";
-			productName = "DingLoop";
+			name = DingLoop;
+			productName = DingLoop;
 			productReference = AA0022010000000000000001 /* DingLoop.app */;
-			productType = "com.apple.product-type.application";
-		};
-		AA0040020000000000000001 /* DingLoop Watch App */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = AA0090040000000000000001 /* Build configuration list for PBXNativeTarget "DingLoop Watch App" */;
-			buildPhases = (
-				AA0061010000000000000001 /* Sources */,
-				AA0061020000000000000001 /* Frameworks */,
-				AA0061030000000000000001 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "DingLoop Watch App";
-			productName = "DingLoop Watch App";
-			productReference = AA0022020000000000000001 /* DingLoop Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
 		AA0040030000000000000001 /* DingLoopLiveActivityExtension */ = {
@@ -263,9 +223,6 @@
 					AA0040010000000000000001 = {
 						CreatedOnToolsVersion = 16.0;
 					};
-					AA0040020000000000000001 = {
-						CreatedOnToolsVersion = 16.0;
-					};
 					AA0040030000000000000001 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -286,7 +243,6 @@
 			projectRoot = "";
 			targets = (
 				AA0040010000000000000001 /* DingLoop */,
-				AA0040020000000000000001 /* DingLoop Watch App */,
 				AA0040030000000000000001 /* DingLoopLiveActivityExtension */,
 			);
 		};
@@ -306,13 +262,9 @@
 				AA0012010000000000000001 /* ding-tone.caf in Resources */,
 				AA0012020000000000000001 /* pop-tone.caf in Resources */,
 				AA0012030000000000000001 /* chime-tone.caf in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AA0061030000000000000001 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				AA0012040000000000000001 /* ding-tone-alarmkit.caf in Resources */,
+				AA0012050000000000000001 /* pop-tone-alarmkit.caf in Resources */,
+				AA0012060000000000000001 /* chime-tone-alarmkit.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,20 +285,8 @@
 				AA0010010000000000000001 /* DingLoopApp.swift in Sources */,
 				AA0010020000000000000001 /* ContentView.swift in Sources */,
 				AA0010030000000000000001 /* AlarmViewModel.swift in Sources */,
-				AA0010040000000000000001 /* PhoneWatchSync.swift in Sources */,
 				AA00100A0000000000000001 /* DingLoopActivityAttributes.swift in Sources */,
 				AA00100B0000000000000001 /* LiveActivityController.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AA0061010000000000000001 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AA0010060000000000000001 /* DingLoopWatchApp.swift in Sources */,
-				AA0010070000000000000001 /* WatchContentView.swift in Sources */,
-				AA0010080000000000000001 /* WatchAlarmViewModel.swift in Sources */,
-				AA0010090000000000000001 /* WatchConnectivityBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,21 +431,22 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DingLoop/DingLoop.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = SB2Z6HL579;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DingLoop/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop;
-				PRODUCT_NAME = "DingLoop";
+				PRODUCT_NAME = DingLoop;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -521,21 +462,22 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = DingLoop/DingLoop.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = SB2Z6HL579;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DingLoop/Info.plist;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop;
-				PRODUCT_NAME = "DingLoop";
+				PRODUCT_NAME = DingLoop;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -547,70 +489,23 @@
 			};
 			name = Release;
 		};
-		AA0080050000000000000001 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "DingLoopWatch Watch App/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop.watchkitapp;
-				PRODUCT_NAME = "DingLoop Watch App";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "watchos watchsimulator";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Debug;
-		};
-		AA0080060000000000000001 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = "DingLoopWatch Watch App/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop.watchkitapp;
-				PRODUCT_NAME = "DingLoop Watch App";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "watchos watchsimulator";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Release;
-		};
 		AA0080070000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = DingLoopLiveActivity/DingLoopLiveActivityExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = SB2Z6HL579;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DingLoopLiveActivity/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop.liveactivity;
 				PRODUCT_NAME = DingLoopLiveActivityExtension;
 				SDKROOT = iphoneos;
@@ -629,18 +524,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = DingLoopLiveActivity/DingLoopLiveActivityExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = SB2Z6HL579;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DingLoopLiveActivity/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop.liveactivity;
 				PRODUCT_NAME = DingLoopLiveActivityExtension;
 				SDKROOT = iphoneos;
@@ -672,15 +568,6 @@
 			buildConfigurations = (
 				AA0080030000000000000001 /* Debug */,
 				AA0080040000000000000001 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		AA0090040000000000000001 /* Build configuration list for PBXNativeTarget "DingLoop Watch App" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AA0080050000000000000001 /* Debug */,
-				AA0080060000000000000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
