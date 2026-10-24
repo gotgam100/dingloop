@@ -13,6 +13,11 @@ struct DingLoopActivityAttributes: ActivityAttributes {
         var remainingSeconds: Int
         var isRunning: Bool
         var isPaused: Bool
+        /// Live loop: the tones in order, as `AlarmTone` raw values.
+        var toneSequence: [String]
+        /// Live loop: show which tones loop and whether it is paused,
+        /// instead of a single countdown.
+        var isLoop: Bool
     }
 
     var intervalMinutes: Int

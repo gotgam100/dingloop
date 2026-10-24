@@ -278,37 +278,69 @@ private func fullUnitTitle(_ rawValue: String) -> String {
 struct DingLoopLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: DingLoopActivityAttributes.self) { context in
-            LockScreenLiveActivityView(context: context)
-                .activityBackgroundTint(.black.opacity(0.92))
-                .activitySystemActionForegroundColor(dingActivityAccentColor(for: context.state.accentName))
+            Group {
+                if context.state.isLoop {
+                    LoopLockScreenView(context: context)
+                } else {
+                    LockScreenLiveActivityView(context: context)
+                }
+            }
+            .activityBackgroundTint(.black.opacity(0.92))
+            .activitySystemActionForegroundColor(dingActivityAccentColor(for: context.state.accentName))
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    IslandActivityMark(accent: dingActivityAccentColor(for: context.state.accentName))
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .padding(.trailing, 10)
+                    Group {
+                        if context.state.isLoop {
+                            ToneSequenceMarks(sequence: context.state.toneSequence, size: 9)
+                        } else {
+                            IslandActivityMark(accent: dingActivityAccentColor(for: context.state.accentName))
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.trailing, 10)
                 }
 
                 DynamicIslandExpandedRegion(.center) {
-                    countdownText(context)
-                        .font(.title3.monospacedDigit().weight(.black))
-                        .foregroundStyle(dingActivityAccentColor(for: context.state.accentName))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.62)
-                        .frame(minWidth: 98)
+                    if context.state.isLoop {
+                        Text(context.state.toneName)
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.62)
+                    } else {
+                        countdownText(context)
+                            .font(.title3.monospacedDigit().weight(.black))
+                            .foregroundStyle(dingActivityAccentColor(for: context.state.accentName))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.62)
+                            .frame(minWidth: 98)
+                    }
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("\(context.state.intervalMinutes)\(compactUnitTitle(context.state.timeUnitRawValue))")
-                        .font(.caption.monospacedDigit().weight(.bold))
-                        .foregroundStyle(.white.opacity(0.72))
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 10)
+                    Group {
+                        if context.state.isLoop {
+                            LoopStatusIcon(isPaused: context.state.isPaused)
+                                .font(.callout.weight(.bold))
+                        } else {
+                            Text(context.state.toneName)
+                                .font(.caption.weight(.bold))
+                                .lineLimit(1)
+                        }
+                    }
+                    .foregroundStyle(.white.opacity(0.72))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 10)
                 }
 
                 DynamicIslandExpandedRegion(.bottom) {
-                    if context.state.isPaused {
+                    if context.state.isLoop {
+                        Text(loopStatusTitle(isPaused: context.state.isPaused))
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.6))
+                            .lineLimit(1)
+                    } else if context.state.isPaused {
                         Capsule()
                             .fill(dingActivityAccentColor(for: context.state.accentName).opacity(0.32))
                             .frame(height: 4)
@@ -323,19 +355,35 @@ struct DingLoopLiveActivityWidget: Widget {
                     }
                 }
             } compactLeading: {
-                IslandActivityMark(accent: dingActivityAccentColor(for: context.state.accentName))
+                if context.state.isLoop {
+                    ToneSequenceMarks(sequence: context.state.toneSequence, size: 7)
+                } else {
+                    IslandActivityMark(accent: dingActivityAccentColor(for: context.state.accentName))
+                }
             } compactTrailing: {
-                Text("\(context.state.intervalMinutes)")
-                    .font(.caption2.monospacedDigit().weight(.bold))
-                    .foregroundStyle(dingActivityAccentColor(for: context.state.accentName))
-                    .lineLimit(1)
+                if context.state.isLoop {
+                    LoopStatusIcon(isPaused: context.state.isPaused)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.85))
+                } else {
+                    countdownText(context)
+                        .font(.caption2.monospacedDigit().weight(.bold))
+                        .foregroundStyle(dingActivityAccentColor(for: context.state.accentName))
+                        .lineLimit(1)
+                        .frame(maxWidth: 44)
+                }
             } minimal: {
-                IslandActivityMark(accent: dingActivityAccentColor(for: context.state.accentName))
+                if context.state.isLoop {
+                    ToneSequenceMarks(sequence: Array(context.state.toneSequence.prefix(1)), size: 8)
+                } else {
+                    IslandActivityMark(accent: dingActivityAccentColor(for: context.state.accentName))
+                }
             }
             .keylineTint(dingActivityAccentColor(for: context.state.accentName))
         }
     }
 
+    @ViewBuilder
     private func countdownText(_ context: ActivityViewContext<DingLoopActivityAttributes>) -> some View {
         if context.state.isPaused {
             Text(formatRemainingSeconds(context.state.remainingSeconds))
@@ -349,6 +397,72 @@ struct DingLoopLiveActivityWidget: Widget {
     private func formatRemainingSeconds(_ seconds: Int) -> String {
         let clamped = max(0, seconds)
         return String(format: "%02d:%02d", clamped / 60, clamped % 60)
+    }
+}
+
+/// "Looping" / "Paused" in the phone's language.
+private func loopStatusTitle(isPaused: Bool) -> String {
+    let isKorean = Locale.preferredLanguages.first?.hasPrefix("ko") == true
+    if isPaused {
+        return isKorean ? "일시정지" : "Paused"
+    }
+    return isKorean ? "반복 중" : "Looping"
+}
+
+private struct LoopStatusIcon: View {
+    let isPaused: Bool
+
+    var body: some View {
+        Image(systemName: isPaused ? "pause.fill" : "repeat")
+    }
+}
+
+/// The loop's tones in order, as small colored diamonds.
+private struct ToneSequenceMarks: View {
+    let sequence: [String]
+    let size: CGFloat
+
+    var body: some View {
+        HStack(spacing: size * 0.55) {
+            ForEach(Array(sequence.enumerated()), id: \.offset) { _, tone in
+                Rectangle()
+                    .fill(dingActivityAccentColor(for: tone))
+                    .frame(width: size, height: size)
+                    .rotationEffect(.degrees(45))
+                    .padding(size * 0.2)
+            }
+        }
+    }
+}
+
+private struct LoopLockScreenView: View {
+    let context: ActivityViewContext<DingLoopActivityAttributes>
+
+    var body: some View {
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 6) {
+                ToneSequenceMarks(sequence: context.state.toneSequence, size: 11)
+                Text(context.state.toneName)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.75))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+
+            Spacer(minLength: 24)
+
+            HStack(spacing: 6) {
+                LoopStatusIcon(isPaused: context.state.isPaused)
+                    .font(.body.weight(.bold))
+                Text(loopStatusTitle(isPaused: context.state.isPaused))
+                    .font(.headline.weight(.bold))
+            }
+            .foregroundStyle(.white.opacity(context.state.isPaused ? 0.6 : 0.9))
+        }
+        .frame(maxWidth: 310)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 18)
     }
 }
 
@@ -539,11 +653,17 @@ private struct LockScreenLiveActivityView: View {
         let accent = dingActivityAccentColor(for: context.state.accentName)
 
         HStack(spacing: 0) {
-            Text("\(context.state.intervalMinutes) \(fullUnitTitle(context.state.timeUnitRawValue))")
-                .font(.title2.monospacedDigit().weight(.heavy))
-                .foregroundStyle(.white.opacity(0.9))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(context.state.toneName)
+                    .font(.title2.weight(.heavy))
+                    .foregroundStyle(accent)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text("\(context.state.intervalMinutes) \(fullUnitTitle(context.state.timeUnitRawValue))")
+                    .font(.caption.monospacedDigit().weight(.bold))
+                    .foregroundStyle(.white.opacity(0.6))
+                    .lineLimit(1)
+            }
 
             Spacer(minLength: 34)
 
@@ -579,6 +699,8 @@ private func dingActivityAccentColor(for name: String) -> Color {
         Color(red: 1.0, green: 0.82, blue: 0.18)
     case "chime":
         Color(red: 0.22, green: 0.52, blue: 1.0)
+    case "voice":
+        Color(red: 0.89, green: 0.89, blue: 0.86)
     default:
         Color(red: 1.0, green: 0.17, blue: 0.06)
     }

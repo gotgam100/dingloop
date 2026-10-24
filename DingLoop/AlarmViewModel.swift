@@ -137,8 +137,9 @@ final class AlarmViewModel: ObservableObject {
     private static let widgetToneKey = "DingLoop.widget.tone"
     private static let widgetEndDateKey = "DingLoop.widget.endDate"
     private var timer: Timer?
-    private var player: AVAudioPlayer?
-    private var recorder: AVAudioRecorder?
+    private let audio = DingLoopAudioWorker()
+    // What the live loop's Live Activity currently shows (nil = no activity).
+    private var shownLoopIsPaused: Bool?
     private var recordingStopTimer: Timer?
     private var voiceRecordingStartTask: Task<Void, Never>?
     private var runningTone: AlarmTone?
@@ -158,18 +159,28 @@ final class AlarmViewModel: ObservableObject {
         runMode = Self.storedRunMode()
         timeUnit = Self.storedTimeUnit()
         alarmSequence = Self.storedAlarmSequence()
-        if runMode == .stop {
+        hasVoiceRecording = FileManager.default.fileExists(atPath: Self.voiceRecordingURL.path)
+        if !hasVoiceRecording {
             alarmSequence.removeAll { $0 == .voice }
             if alarmTone == .voice {
                 alarmTone = .ding
             }
         }
         intervalMinutes = Self.storedInterval(for: alarmTone)
-        hasVoiceRecording = FileManager.default.fileExists(atPath: Self.voiceRecordingURL.path)
         resetRemainingSeconds()
         Self.installNotificationSounds()
+        Task.detached(priority: .utility) {
+            AlarmViewModel.installVoiceSounds()
+        }
         if #available(iOS 26.0, *) {
             alarmKitController = DingLoopAlarmKitController()
+        }
+        if runMode == .live {
+            // A live loop never survives a relaunch, so drop any activity left on the lock screen.
+            liveActivityController.end()
+        }
+        liveActivityController.onDismissedByUser = { [weak self] in
+            self?.stopLoopAfterLiveActivityDismissed()
         }
         publishWidgetState(reloadTimeline: false)
     }
@@ -284,7 +295,6 @@ final class AlarmViewModel: ObservableObject {
     }
 
     func insertToneToSequence(_ tone: AlarmTone, at index: Int) {
-        guard tone != .voice || runMode == .live else { return }
         guard tone != .voice || hasVoiceRecording else { return }
         let clamped = min(max(index, 0), alarmSequence.count)
         alarmSequence.insert(tone, at: clamped)
@@ -295,7 +305,6 @@ final class AlarmViewModel: ObservableObject {
     }
 
     func ensureToneInSequence(_ tone: AlarmTone) {
-        guard tone != .voice || runMode == .live else { return }
         guard tone != .voice || hasVoiceRecording else { return }
         guard !alarmSequence.contains(tone), alarmSequence.count < 3 else { return }
         alarmSequence.append(tone)
@@ -314,7 +323,6 @@ final class AlarmViewModel: ObservableObject {
     }
 
     private func applyAlarmTone(_ tone: AlarmTone) {
-        guard tone != .voice || runMode == .live else { return }
         guard tone != .voice || hasVoiceRecording else { return }
         alarmTone = tone
         Self.storeAlarmTone(tone)
@@ -330,14 +338,7 @@ final class AlarmViewModel: ObservableObject {
         isVoiceRecordArmed = false
         runMode = mode
         UserDefaults.standard.set(mode.rawValue, forKey: Self.runModeKey)
-
-        if mode == .stop {
-            alarmSequence.removeAll { $0 == .voice }
-            if alarmTone == .voice {
-                applyAlarmTone(.ding)
-            }
-            storeAlarmSequence()
-        }
+        refreshBackgroundAudio()
     }
 
     private func startTimer() {
@@ -370,6 +371,7 @@ final class AlarmViewModel: ObservableObject {
                 self?.tick()
             }
         }
+        refreshBackgroundAudio()
     }
 
     private func stopTimer() {
@@ -404,6 +406,7 @@ final class AlarmViewModel: ObservableObject {
             resetRemainingSeconds()
         }
         cancelSystemAlarm()
+        refreshBackgroundAudio()
     }
 
     private func pauseActiveToneForSwitch() {
@@ -448,6 +451,7 @@ final class AlarmViewModel: ObservableObject {
             }
         }
         sendStateToWatch()
+        refreshBackgroundAudio()
     }
 
     private func pauseTimer() {
@@ -471,6 +475,7 @@ final class AlarmViewModel: ObservableObject {
             tone: alarmTone
         )
         sendStateToWatch()
+        refreshBackgroundAudio()
     }
 
     private func resumeTimer() {
@@ -491,6 +496,7 @@ final class AlarmViewModel: ObservableObject {
             }
         }
         sendStateToWatch()
+        refreshBackgroundAudio()
     }
 
     private func tick() {
@@ -543,62 +549,78 @@ final class AlarmViewModel: ObservableObject {
     }
 
     private func playSound(for tone: AlarmTone) {
-        do {
-            try configurePlaybackSession()
-            stopCurrentSound()
-            if tone == .voice, hasVoiceRecording {
-                player = try AVAudioPlayer(contentsOf: Self.voiceRecordingURL)
-            } else if let soundURL = Bundle.main.url(forResource: tone.soundResourceName, withExtension: "caf") {
-                player = try AVAudioPlayer(contentsOf: soundURL)
-            } else {
-                player = try AVAudioPlayer(data: Self.makeDefaultDingData(for: tone))
-            }
-            player?.numberOfLoops = 0
-            player?.prepareToPlay()
-            player?.play()
-        } catch {
-            AudioServicesPlaySystemSound(1005)
+        let source: DingLoopAudioWorker.Source
+        if tone == .voice, hasVoiceRecording {
+            source = .file(Self.voiceRecordingURL)
+        } else if let soundURL = Bundle.main.url(forResource: tone.soundResourceName, withExtension: "caf") {
+            source = .file(soundURL)
+        } else {
+            source = .data(Self.makeDefaultDingData(for: tone))
         }
+        audio.play(source)
     }
 
     private func stopCurrentSound() {
-        player?.stop()
-        player?.currentTime = 0
-        player = nil
+        audio.stopPlayback()
     }
 
-    private func configurePlaybackSession() throws {
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playback, mode: .default)
-        try session.setActive(true)
+    /// Removing the Live Activity (or turning Live Activities off) stops a live loop.
+    private func stopLoopAfterLiveActivityDismissed() {
+        guard runMode == .live, runningTone != nil else { return }
+        stopRunningAlarm(resetVisibleState: true)
+        sendStateToWatch()
+    }
+
+    /// While a live loop is running, keep a silent audio stream playing so iOS keeps
+    /// the app running (and the loop sounding) when the screen is locked.
+    private func refreshBackgroundAudio() {
+        audio.setKeepAlive(runMode == .live && runningTone != nil && !runningIsPaused)
+        syncLoopActivity()
+    }
+
+    /// Shows the live loop in a Live Activity: which tones loop and whether it is paused.
+    /// It only changes when the loop starts, pauses, resumes or stops (all done in the app),
+    /// never per tone, because iOS drops Live Activity updates sent from the background.
+    private func syncLoopActivity() {
+        guard runMode == .live else { return }
+
+        guard runningTone != nil else {
+            if shownLoopIsPaused != nil {
+                shownLoopIsPaused = nil
+                liveActivityController.end()
+            }
+            return
+        }
+
+        guard shownLoopIsPaused != runningIsPaused else { return }
+        shownLoopIsPaused = runningIsPaused
+        let sequence = alarmSequence.isEmpty ? [alarmTone] : alarmSequence
+        liveActivityController.showLoop(sequence: sequence, isPaused: runningIsPaused)
     }
 
     private func beginVoiceRecording() {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .spokenAudio, options: [.defaultToSpeaker, .allowBluetoothHFP])
-            try session.setActive(true)
+        let settings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 44_100,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
 
-            let settings: [String: Any] = [
-                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-                AVSampleRateKey: 44_100,
-                AVNumberOfChannelsKey: 1,
-                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-            ]
-            recorder = try AVAudioRecorder(url: Self.voiceRecordingURL, settings: settings)
-            recorder?.prepareToRecord()
-            recorder?.record(forDuration: 10)
-            isRecordingVoice = true
-            isVoiceRecordArmed = true
-            recordingStopTimer?.invalidate()
-            recordingStopTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
-                Task { @MainActor in
-                    self?.stopVoiceRecording(save: true)
-                }
+        // Show the recording state right away; the session work happens off the main thread.
+        isRecordingVoice = true
+        isVoiceRecordArmed = true
+        recordingStopTimer?.invalidate()
+        recordingStopTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
+            Task { @MainActor in
+                self?.stopVoiceRecording(save: true)
             }
-        } catch {
-            isRecordingVoice = false
-            print("Failed to record DingLoop voice alarm: \(error)")
+        }
+
+        audio.startRecording(to: Self.voiceRecordingURL, settings: settings, duration: 10) { [weak self] started in
+            guard let self, !started else { return }
+            self.recordingStopTimer?.invalidate()
+            self.recordingStopTimer = nil
+            self.isRecordingVoice = false
         }
     }
 
@@ -619,15 +641,20 @@ final class AlarmViewModel: ObservableObject {
         voiceRecordingStartTask = nil
         recordingStopTimer?.invalidate()
         recordingStopTimer = nil
-        recorder?.stop()
-        recorder = nil
         isRecordingVoice = false
-        hasVoiceRecording = FileManager.default.fileExists(atPath: Self.voiceRecordingURL.path)
         if save {
             isVoiceRecordArmed = false
         }
-        if save, hasVoiceRecording {
-            applyAlarmTone(.voice)
+
+        audio.stopRecording { [weak self] wasRecording in
+            guard let self else { return }
+            self.hasVoiceRecording = FileManager.default.fileExists(atPath: Self.voiceRecordingURL.path)
+            // Only a recording that just finished should switch the tone to Voice.
+            guard save, wasRecording, self.hasVoiceRecording else { return }
+            self.applyAlarmTone(.voice)
+            Task.detached(priority: .userInitiated) {
+                AlarmViewModel.installVoiceSounds()
+            }
         }
     }
 
@@ -671,8 +698,9 @@ final class AlarmViewModel: ObservableObject {
                 timeUnit: runningTimeUnit
             )
         } else {
-            cancelSystemAlarm()
-            scheduleLiveNotification(tone: tone, durationSeconds: runningRemainingSeconds, intervalMinutes: runningIntervalMinutes, timeUnit: runningTimeUnit)
+            // Background audio keeps the app running, so it plays each loop itself.
+            cancelScheduledSystemAlarms()
+            cancelLiveNotification()
         }
     }
 
@@ -706,13 +734,6 @@ final class AlarmViewModel: ObservableObject {
     private func pauseSystemAlarm(intervalMinutes: Int, remainingSeconds: Int, tone: AlarmTone) {
         if runMode == .live {
             cancelLiveNotification()
-            liveActivityController.update(
-                intervalMinutes: intervalMinutes,
-                timeUnit: runningTimeUnit,
-                remainingSeconds: remainingSeconds,
-                tone: tone,
-                isPaused: true
-            )
             return
         }
 
@@ -734,21 +755,12 @@ final class AlarmViewModel: ObservableObject {
 
     private func resumeSystemAlarm(intervalMinutes: Int, remainingSeconds: Int, tone: AlarmTone) {
         if runMode == .live {
-            scheduleLiveNotification(tone: tone, durationSeconds: remainingSeconds, intervalMinutes: intervalMinutes, timeUnit: runningTimeUnit)
-            liveActivityController.update(
-                intervalMinutes: intervalMinutes,
-                timeUnit: runningTimeUnit,
-                remainingSeconds: remainingSeconds,
-                tone: tone,
-                isPaused: false
-            )
+            cancelLiveNotification()
             return
         }
 
         persistVisibleSystemEndDate(remainingSeconds: remainingSeconds)
-        Task {
-            await liveActivityController.end()
-        }
+        liveActivityController.end()
         if #available(iOS 26.0, *),
            let alarmKitController = alarmKitController as? DingLoopAlarmKitController,
            alarmKitController.isScheduled {
@@ -779,6 +791,13 @@ final class AlarmViewModel: ObservableObject {
     }
 
     private func cancelSystemAlarm() {
+        cancelScheduledSystemAlarms()
+        if runMode == .stop {
+            liveActivityController.end()
+        }
+    }
+
+    private func cancelScheduledSystemAlarms() {
         systemAlarmGeneration += 1
         currentSystemEndDate = nil
         if #available(iOS 26.0, *),
@@ -786,9 +805,6 @@ final class AlarmViewModel: ObservableObject {
             alarmKitController.cancel()
         }
         cancelRepeatingNotification()
-        Task {
-            await liveActivityController.end()
-        }
     }
 
     private func persistVisibleSystemEndDate(remainingSeconds: Int) {
@@ -900,6 +916,7 @@ final class AlarmViewModel: ObservableObject {
                 self?.tick()
             }
         }
+        refreshBackgroundAudio()
     }
 
     private func nextTone(after tone: AlarmTone) -> AlarmTone? {
@@ -924,6 +941,7 @@ final class AlarmViewModel: ObservableObject {
         cancelSystemAlarm()
         cancelLiveNotification()
         sendStateToWatch()
+        refreshBackgroundAudio()
     }
 
     private func scheduleLiveNotification(tone: AlarmTone, durationSeconds: Int, intervalMinutes: Int, timeUnit: AlarmTimeUnit) {
@@ -1028,6 +1046,57 @@ final class AlarmViewModel: ObservableObject {
         }
     }
 
+    /// Converts the recorded voice (m4a) into 16-bit PCM .caf files in Library/Sounds,
+    /// so notifications and AlarmKit can play it by name like the bundled tones.
+    @discardableResult
+    nonisolated private static func installVoiceSounds() -> Bool {
+        guard FileManager.default.fileExists(atPath: voiceRecordingURL.path),
+              let soundsDirectory = notificationSoundsDirectory() else {
+            return false
+        }
+
+        do {
+            try FileManager.default.createDirectory(at: soundsDirectory, withIntermediateDirectories: true)
+
+            let source = try AVAudioFile(forReading: voiceRecordingURL)
+            let format = source.processingFormat
+            let frameCount = AVAudioFrameCount(source.length)
+            guard frameCount > 0,
+                  let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else {
+                return false
+            }
+            try source.read(into: buffer)
+
+            let settings: [String: Any] = [
+                AVFormatIDKey: Int(kAudioFormatLinearPCM),
+                AVSampleRateKey: format.sampleRate,
+                AVNumberOfChannelsKey: Int(format.channelCount),
+                AVLinearPCMBitDepthKey: 16,
+                AVLinearPCMIsFloatKey: false,
+                AVLinearPCMIsBigEndianKey: false,
+                AVLinearPCMIsNonInterleaved: false
+            ]
+
+            for fileName in [AlarmTone.voice.soundFileName, AlarmTone.voice.alarmKitSoundFileName] {
+                let targetURL = soundsDirectory.appendingPathComponent(fileName)
+                if FileManager.default.fileExists(atPath: targetURL.path) {
+                    try FileManager.default.removeItem(at: targetURL)
+                }
+                let output = try AVAudioFile(
+                    forWriting: targetURL,
+                    settings: settings,
+                    commonFormat: format.commonFormat,
+                    interleaved: format.isInterleaved
+                )
+                try output.write(from: buffer)
+            }
+            return true
+        } catch {
+            print("Failed to install DingLoop voice sounds: \(error)")
+            return false
+        }
+    }
+
     private static func notificationSoundURL(for tone: AlarmTone) -> URL? {
         if let soundsDirectory = notificationSoundsDirectory() {
             let targetURL = soundsDirectory.appendingPathComponent(tone.soundFileName)
@@ -1039,7 +1108,7 @@ final class AlarmViewModel: ObservableObject {
         return Bundle.main.url(forResource: tone.soundResourceName, withExtension: "caf")
     }
 
-    private static func notificationSoundsDirectory() -> URL? {
+    nonisolated private static func notificationSoundsDirectory() -> URL? {
         FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first?
             .appendingPathComponent("Sounds", isDirectory: true)
     }
@@ -1164,9 +1233,187 @@ final class AlarmViewModel: ObservableObject {
         return data
     }
 
-    private static var voiceRecordingURL: URL {
+    nonisolated private static var voiceRecordingURL: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("dingloop-voice.m4a")
+    }
+}
+
+/// Owns AVAudioSession, playback and recording on one serial background queue,
+/// so session changes never block the main thread.
+private final class DingLoopAudioWorker: @unchecked Sendable {
+    enum Source {
+        case file(URL)
+        case data(Data)
+    }
+
+    private enum SessionMode {
+        case playback
+        case recording
+    }
+
+    private let queue = DispatchQueue(label: "com.baekmac.dingloop.audio", qos: .userInitiated)
+    // Touched only on `queue`.
+    private var sessionMode: SessionMode?
+    private var player: AVAudioPlayer?
+    private var recorder: AVAudioRecorder?
+    private var keepAlivePlayer: AVAudioPlayer?
+    private var wantsKeepAlive = false
+
+    init() {
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            guard let rawType = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  AVAudioSession.InterruptionType(rawValue: rawType) == .ended else { return }
+            self?.queue.async { [weak self] in
+                self?.startKeepAlivePlayerIfNeeded()
+            }
+        }
+    }
+
+    /// Plays silence on a loop while `enabled`, which keeps the app alive in the background.
+    func setKeepAlive(_ enabled: Bool) {
+        queue.async { [self] in
+            guard wantsKeepAlive != enabled else { return }
+            wantsKeepAlive = enabled
+            if enabled {
+                startKeepAlivePlayerIfNeeded()
+            } else {
+                keepAlivePlayer?.stop()
+                keepAlivePlayer = nil
+            }
+        }
+    }
+
+    private func startKeepAlivePlayerIfNeeded() {
+        guard wantsKeepAlive else { return }
+        do {
+            if recorder == nil {
+                try activateSession(.playback)
+            }
+            if keepAlivePlayer == nil {
+                let silentPlayer = try AVAudioPlayer(data: Self.silentWAV(seconds: 1))
+                silentPlayer.numberOfLoops = -1
+                keepAlivePlayer = silentPlayer
+            }
+            keepAlivePlayer?.play()
+        } catch {
+            print("DingLoop background audio failed: \(error)")
+        }
+    }
+
+    private static func silentWAV(seconds: Double) -> Data {
+        let sampleRate: UInt32 = 44_100
+        let sampleCount = UInt32(Double(sampleRate) * seconds)
+        let dataSize = sampleCount * 2
+        var data = Data()
+        func append<T: FixedWidthInteger>(_ value: T) {
+            var little = value.littleEndian
+            data.append(Data(bytes: &little, count: MemoryLayout<T>.size))
+        }
+        data.append(contentsOf: "RIFF".utf8)
+        append(UInt32(36) + dataSize)
+        data.append(contentsOf: "WAVEfmt ".utf8)
+        append(UInt32(16))
+        append(UInt16(1))
+        append(UInt16(1))
+        append(sampleRate)
+        append(sampleRate * 2)
+        append(UInt16(2))
+        append(UInt16(16))
+        data.append(contentsOf: "data".utf8)
+        append(dataSize)
+        data.append(Data(count: Int(dataSize)))
+        return data
+    }
+
+    func play(_ source: Source) {
+        queue.async { [self] in
+            stopPlayer()
+            do {
+                try activateSession(.playback)
+                let newPlayer: AVAudioPlayer
+                switch source {
+                case .file(let url):
+                    newPlayer = try AVAudioPlayer(contentsOf: url)
+                case .data(let data):
+                    newPlayer = try AVAudioPlayer(data: data)
+                }
+                newPlayer.numberOfLoops = 0
+                newPlayer.prepareToPlay()
+                newPlayer.play()
+                player = newPlayer
+            } catch {
+                print("Failed to play DingLoop sound: \(error)")
+                AudioServicesPlaySystemSound(1005)
+            }
+        }
+    }
+
+    func stopPlayback() {
+        queue.async { [self] in
+            stopPlayer()
+        }
+    }
+
+    func startRecording(
+        to url: URL,
+        settings: [String: Any],
+        duration: TimeInterval,
+        completion: @escaping @MainActor (Bool) -> Void
+    ) {
+        queue.async { [self] in
+            stopPlayer()
+            recorder?.stop()
+            recorder = nil
+
+            var started = false
+            do {
+                try activateSession(.recording)
+                let newRecorder = try AVAudioRecorder(url: url, settings: settings)
+                newRecorder.prepareToRecord()
+                started = newRecorder.record(forDuration: duration)
+                recorder = started ? newRecorder : nil
+            } catch {
+                print("Failed to record DingLoop voice alarm: \(error)")
+            }
+            Task { @MainActor in completion(started) }
+        }
+    }
+
+    /// Calls back with whether a recording was in progress.
+    func stopRecording(completion: @escaping @MainActor (Bool) -> Void) {
+        queue.async { [self] in
+            let wasRecording = recorder != nil
+            recorder?.stop()
+            recorder = nil
+            startKeepAlivePlayerIfNeeded()
+            Task { @MainActor in completion(wasRecording) }
+        }
+    }
+
+    private func stopPlayer() {
+        player?.stop()
+        player = nil
+    }
+
+    /// Changes the category only when switching between playback and recording.
+    private func activateSession(_ mode: SessionMode) throws {
+        let session = AVAudioSession.sharedInstance()
+        if sessionMode != mode {
+            switch mode {
+            case .playback:
+                try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            case .recording:
+                try session.setCategory(.playAndRecord, mode: .spokenAudio, options: [.defaultToSpeaker, .allowBluetoothHFP])
+            }
+            sessionMode = mode
+        }
+        // Re-activating is cheap off the main thread and recovers from interruptions.
+        try session.setActive(true)
     }
 }
 

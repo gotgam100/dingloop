@@ -598,6 +598,15 @@ struct ContentView: View {
                 }
                 .simultaneousGesture(fastToneDragGesture(for: tone))
             }
+
+            // A recorded voice can also ring through AlarmKit in stop mode.
+            if viewModel.hasVoiceRecording {
+                ToneChip(tone: .voice, isSelected: viewModel.alarmTone == .voice) {
+                    viewModel.selectAlarmTone(.voice)
+                    viewModel.previewDefaultSound()
+                }
+                .simultaneousGesture(fastToneDragGesture(for: .voice))
+            }
         }
     }
 
