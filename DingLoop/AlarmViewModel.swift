@@ -9,6 +9,7 @@ enum AlarmTone: String, CaseIterable, Identifiable {
     case ding
     case pop
     case chime
+    case beep
     case voice
 
     var id: String { rawValue }
@@ -18,6 +19,7 @@ enum AlarmTone: String, CaseIterable, Identifiable {
         case .ding: "Ding"
         case .pop: "Pop"
         case .chime: "Chime"
+        case .beep: "Beep"
         case .voice: "Voice"
         }
     }
@@ -27,6 +29,7 @@ enum AlarmTone: String, CaseIterable, Identifiable {
         case .ding: "ding-tone"
         case .pop: "pop-tone"
         case .chime: "chime-tone"
+        case .beep: "beep-tone"
         case .voice: "voice-tone"
         }
     }
@@ -100,6 +103,8 @@ final class AlarmViewModel: ObservableObject {
     private static let timeUnitKey = "DingLoop.timeUnit"
     private static let alarmSequenceKey = "DingLoop.sequence"
     private static let intervalKeyPrefix = "DingLoop.interval."
+    /// How many tones the loop box holds.
+    static let loopCapacity = 4
     private static let maxRecordingSeconds: TimeInterval = 10
     private static let minRecordingSeconds: TimeInterval = 0.5
 
@@ -147,12 +152,17 @@ final class AlarmViewModel: ObservableObject {
         isRunning ? stopLoop() : startLoop()
     }
 
+    /// The loop box's play button: plays the loop box in order from its first slot.
+    func toggleLoopFromStart() {
+        isRunning ? stopLoop() : startLoop(fromFirstSlot: true)
+    }
+
     func togglePause() {
         guard isRunning else { return }
         isPaused ? resumeLoop() : pauseLoop()
     }
 
-    private func startLoop() {
+    private func startLoop(fromFirstSlot: Bool = false) {
         guard !isRunning, !isRecordingVoice else { return }
 
         // An empty loop box loops the selected tone, and shows it in the box.
@@ -161,7 +171,7 @@ final class AlarmViewModel: ObservableObject {
             storeAlarmSequence()
         }
         loopTones = alarmSequence
-        loopIndex = loopTones.firstIndex(of: alarmTone) ?? 0
+        loopIndex = fromFirstSlot ? 0 : (loopTones.firstIndex(of: alarmTone) ?? 0)
         currentLoopNumber = 1
         isRunning = true
         isPaused = false
@@ -294,7 +304,7 @@ final class AlarmViewModel: ObservableObject {
         guard tone != .voice || hasVoiceRecording else { return }
         let clamped = min(max(index, 0), alarmSequence.count)
         alarmSequence.insert(tone, at: clamped)
-        if alarmSequence.count > 3 {
+        if alarmSequence.count > Self.loopCapacity {
             alarmSequence.removeLast()
         }
         storeAlarmSequence()
@@ -555,6 +565,12 @@ final class AlarmViewModel: ObservableObject {
             frequencies = [(660, 0.8), (990, 0.55), (1480, 0.28)]
             decay = 4.2
             gain = 0.58
+        case .beep:
+            // Placeholder until a recorded beep sound is added.
+            duration = 0.22
+            frequencies = [(1320, 1.0)]
+            decay = 3.0
+            gain = 0.5
         case .voice:
             duration = 0.44
             frequencies = [(740, 0.9), (1110, 0.42)]

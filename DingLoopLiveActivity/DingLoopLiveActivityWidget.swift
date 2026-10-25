@@ -126,6 +126,8 @@ private func toneColor(for name: String) -> Color {
         Color(red: 1.0, green: 0.82, blue: 0.18)
     case "chime":
         Color(red: 0.22, green: 0.52, blue: 1.0)
+    case "beep":
+        Color(red: 0.2, green: 0.86, blue: 0.5)
     case "voice":
         Color(red: 0.89, green: 0.89, blue: 0.86)
     default:

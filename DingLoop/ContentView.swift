@@ -69,6 +69,20 @@ private enum AppLanguage {
         }
     }
 
+    var moreAppsTitle: String {
+        switch self {
+        case .korean: "개발자의 다른 앱"
+        case .english: "More Apps by the Developer"
+        }
+    }
+
+    var emptyLoopTitle: String {
+        switch self {
+        case .korean: "Loop (여기로 드래그)"
+        case .english: "Loop (drag here)"
+        }
+    }
+
     func hintText(_ hint: LoopHint) -> String {
         switch (self, hint) {
         case (.korean, .lowVolume): "미디어 볼륨이 낮아요"
@@ -97,6 +111,8 @@ struct ContentView: View {
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
+    /// Design trial: chips on one row and the loop box on the row below.
+    private let usesTwoRowDock = true
     private let legalPageURL = URL(string: "https://gotgam100.github.io/dingloop/index.html")!
 
     var body: some View {
@@ -146,20 +162,29 @@ struct ContentView: View {
             Text("DingLoop")
                 .font(.paper(.semiBold, size: 17))
                 .foregroundStyle(Color.ampText.opacity(0.82))
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
-                        isInfoPresented.toggle()
-                    }
-                }
 
             Spacer()
+
+            Button {
+                withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
+                    isInfoPresented.toggle()
+                }
+            } label: {
+                Image(systemName: isInfoPresented ? "xmark" : "gearshape.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.ampText.opacity(0.72))
+                    .frame(width: 40, height: 40)
+                    .contentShape(Rectangle())
+                    .contentTransition(.symbolEffect(.replace))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(selectedLanguage.settingsTitle)
         }
     }
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: 18)
+            Spacer(minLength: usesTwoRowDock ? 6 : 18)
 
             ClockDial(
                 intervalMinutes: $viewModel.intervalMinutes,
@@ -183,11 +208,11 @@ struct ContentView: View {
 
             quickIntervals
                 .padding(.horizontal, 26)
-                .padding(.bottom, 18)
+                .padding(.bottom, usesTwoRowDock ? 14 : 18)
 
             controlDock
                 .padding(.horizontal, 22)
-                .padding(.bottom, 22)
+                .padding(.bottom, usesTwoRowDock ? 30 : 22)
         }
     }
 
@@ -205,6 +230,7 @@ struct ContentView: View {
                 infoRow(selectedLanguage.appInfoTitle, value: appVersion)
                 userGuideRow
                 linkRow(selectedLanguage.termsTitle)
+                linkRow(selectedLanguage.moreAppsTitle, action: openDeveloperApps)
             }
             .padding(.horizontal, 26)
 
@@ -406,11 +432,11 @@ struct ContentView: View {
                 ),
                 (
                     "1. 시작과 정지",
-                    "작고 동그란 핸들을 돌려 간격을 정하고, 가운데 숫자를 꾹 눌러 시작하거나 멈춥니다. 두 번 탭하면 일시정지합니다. 분/초 단위는 설정에서 고를 수 있고, 한 바퀴는 60단위, 최대 360단위입니다."
+                    "작고 동그란 핸들을 돌려 간격을 정합니다. 루프박스 오른쪽의 ▶ 버튼을 누르면 1번 칸부터 순서대로 시작하고, ■를 누르면 멈춥니다. 가운데 숫자를 꾹 눌러도 시작하거나 멈출 수 있고, 두 번 탭하면 일시정지합니다. 분/초 단위는 오른쪽 위 설정에서 고를 수 있고, 한 바퀴는 60단위, 최대 360단위입니다."
                 ),
                 (
                     "2. 루프 등록",
-                    "하단의 소리 버튼을 탭하면 미리 들을 수 있고, 오른쪽 루프박스로 끌어다 놓으면 그 순서대로 반복됩니다. 소리마다 간격을 따로 정할 수 있습니다. 루프가 도는 동안에는 바꿀 수 없으니, 멈춘 뒤 수정해 주세요."
+                    "윗줄의 소리 버튼을 탭하면 미리 들을 수 있고, 아랫줄 루프박스로 끌어다 놓으면 그 순서대로 반복됩니다(최대 4개). 루프박스의 칸을 탭하면 뺄 수 있고, 소리마다 간격을 따로 정할 수 있습니다. 루프가 도는 동안에는 지금 울릴 칸이 표시되며, 바꿀 수 없으니 멈춘 뒤 수정해 주세요."
                 ),
                 (
                     "3. 목소리 녹음",
@@ -429,11 +455,11 @@ struct ContentView: View {
                 ),
                 (
                     "1. Start and Stop",
-                    "Turn the small round handle to set the interval, then press and hold the center number to start or stop. Double-tap to pause. Choose minutes or seconds in Settings. One full turn is 60 units, up to 360."
+                    "Turn the small round handle to set the interval. Tap ▶ beside the loop box to start from the first slot, and ■ to stop. You can also press and hold the center number to start or stop, and double-tap it to pause. Choose minutes or seconds in Settings (top right). One full turn is 60 units, up to 360."
                 ),
                 (
                     "2. Building a Loop",
-                    "Tap a sound button at the bottom to preview it, and drag it into the loop box on the right to repeat it in that order. Each sound keeps its own interval. The loop can't be changed while it runs, so stop it first."
+                    "Tap a sound button in the top row to preview it, and drag it into the loop box below to repeat it in that order (up to 4). Tap a slot to remove it. Each sound keeps its own interval. While the loop runs, the slot that plays next is highlighted; stop the loop to change it."
                 ),
                 (
                     "3. Recording Your Voice",
@@ -447,14 +473,37 @@ struct ContentView: View {
         }
     }
 
-    private func linkRow(_ title: String) -> some View {
-        Button {
-            guard var components = URLComponents(url: legalPageURL, resolvingAgainstBaseURL: false) else {
-                openURL(legalPageURL)
-                return
+    private func openLegalPage() {
+        guard var components = URLComponents(url: legalPageURL, resolvingAgainstBaseURL: false) else {
+            openURL(legalPageURL)
+            return
+        }
+        components.fragment = selectedLanguage == .korean ? "ko" : "en"
+        openURL(components.url ?? legalPageURL)
+    }
+
+    /// Opens the App Store searching for the developer's apps.
+    private func openDeveloperApps() {
+        let term = "Seunghwa Baek".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "Seunghwa%20Baek"
+        let webSearch = URL(string: "https://apps.apple.com/search?term=\(term)")!
+        guard let appStoreSearch = URL(string: "itms-apps://search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?media=software&term=\(term)") else {
+            openURL(webSearch)
+            return
+        }
+        openURL(appStoreSearch) { accepted in
+            if !accepted {
+                openURL(webSearch)
             }
-            components.fragment = selectedLanguage == .korean ? "ko" : "en"
-            openURL(components.url ?? legalPageURL)
+        }
+    }
+
+    private func linkRow(_ title: String, action: (() -> Void)? = nil) -> some View {
+        Button {
+            if let action {
+                action()
+            } else {
+                openLegalPage()
+            }
         } label: {
             HStack {
                 Text(title)
@@ -493,23 +542,37 @@ struct ContentView: View {
         }
     }
 
+    @ViewBuilder
     private var controlDock: some View {
-        HStack(spacing: 10) {
-            toneControls
-            .padding(.horizontal, 8)
-            .padding(.vertical, 8)
-            .background(Color.black.opacity(0.22), in: Capsule())
+        if usesTwoRowDock {
+            twoRowDock
+        } else {
+            oneRowDock
+        }
+    }
 
-            SequenceLane(
-                sequence: viewModel.alarmSequence,
-                selectedTone: viewModel.alarmTone,
-                activeIndex: viewModel.activeLoopIndex,
-                hoverIndex: $loopHoverIndex,
-                removeAction: viewModel.removeSequenceItem,
-                insertAction: viewModel.insertToneToSequence
-            )
-            .frame(maxWidth: .infinity)
-            .allowsHitTesting(!viewModel.isRunning)
+    private var loopLane: some View {
+        SequenceLane(
+            emptyTitle: selectedLanguage.emptyLoopTitle,
+            sequence: viewModel.alarmSequence,
+            selectedTone: viewModel.alarmTone,
+            activeIndex: viewModel.activeLoopIndex,
+            hoverIndex: $loopHoverIndex,
+            removeAction: viewModel.removeSequenceItem,
+            insertAction: viewModel.insertToneToSequence
+        )
+        .frame(maxWidth: .infinity)
+        .allowsHitTesting(!viewModel.isRunning)
+    }
+
+    private var oneRowDock: some View {
+        HStack(spacing: 10) {
+            toneControls(chipSize: 36, spacing: 6)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)
+                .background(Color.black.opacity(0.22), in: Capsule())
+
+            loopLane
         }
         .overlay(alignment: .top) {
             hintBubble
@@ -521,19 +584,46 @@ struct ContentView: View {
         .shadow(color: .black.opacity(0.38), radius: 22, y: 14)
     }
 
+    /// Chips on the first row, the loop box on the second.
+    private var twoRowDock: some View {
+        VStack(spacing: 12) {
+            toneControls(chipSize: 46, spacing: 14)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Color.black.opacity(0.22), in: Capsule())
+
+            HStack(spacing: 10) {
+                loopLane
+                // Colored by the loop box's first tone, not by the selected chip.
+                LoopPlayButton(isRunning: viewModel.isRunning, accent: viewModel.alarmSequence.first?.tint ?? Color.ampText) {
+                    viewModel.toggleLoopFromStart()
+                }
+            }
+        }
+        .overlay(alignment: .top) {
+            hintBubble
+                .offset(y: -122)
+        }
+        .animation(.spring(response: 0.26, dampingFraction: 0.84), value: viewModel.hint)
+        .padding(14)
+        .background(Color.ampPanel.opacity(0.96), in: RoundedRectangle(cornerRadius: 36, style: .continuous))
+        .shadow(color: .black.opacity(0.38), radius: 22, y: 14)
+    }
+
     /// Ding, Pop, Chime and Voice, always in the same place.
     /// Tap: select and preview. Drag: add to the loop box. Hold Voice: record.
     /// Frozen while a loop runs.
-    private var toneControls: some View {
-        HStack(spacing: 6) {
-            ForEach([AlarmTone.ding, .pop, .chime], id: \.self) { tone in
-                ToneChip(tone: tone, isSelected: tone == viewModel.alarmTone) {
+    private func toneControls(chipSize: CGFloat, spacing: CGFloat) -> some View {
+        HStack(spacing: spacing) {
+            ForEach([AlarmTone.ding, .pop, .chime, .beep], id: \.self) { tone in
+                ToneChip(tone: tone, isSelected: tone == viewModel.alarmTone, size: chipSize) {
                     viewModel.selectAlarmTone(tone)
                 }
                 .simultaneousGesture(fastToneDragGesture(for: tone))
             }
 
             VoiceChip(
+                size: chipSize,
                 hasRecording: viewModel.hasVoiceRecording,
                 isSelected: viewModel.alarmTone == .voice,
                 isRecording: viewModel.isRecordingVoice,
@@ -604,11 +694,12 @@ struct ContentView: View {
         guard !viewModel.alarmSequence.isEmpty else { return 0 }
 
         let relativeX = min(max(location.x - loopLaneFrame.minX, 0), max(loopLaneFrame.width, 1))
-        let slotWidth = max(loopLaneFrame.width / 3, 1)
-        let slotIndex = min(2, max(0, Int(relativeX / slotWidth)))
+        let capacity = AlarmViewModel.loopCapacity
+        let slotWidth = max(loopLaneFrame.width / CGFloat(capacity), 1)
+        let slotIndex = min(capacity - 1, max(0, Int(relativeX / slotWidth)))
 
         if slotIndex >= viewModel.alarmSequence.count {
-            return min(viewModel.alarmSequence.count, 2)
+            return min(viewModel.alarmSequence.count, capacity - 1)
         }
 
         return slotIndex
@@ -966,16 +1057,17 @@ struct IconButton: View {
 struct ToneChip: View {
     var tone: AlarmTone
     var isSelected: Bool
+    var size: CGFloat = 36
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Circle()
                 .fill(tone.tint)
-                .frame(width: 36, height: 36)
+                .frame(width: size, height: size)
                 .overlay(
                     Image(systemName: tone.systemName)
-                        .font(.system(size: 13, weight: .bold))
+                        .font(.system(size: size * 0.36, weight: .bold))
                         .foregroundStyle(.black.opacity(0.8))
                 )
                 .overlay(
@@ -991,6 +1083,7 @@ struct ToneChip: View {
 /// The Voice chip. Tap selects and previews the recording; holding it records
 /// (release to save, up to 10 seconds).
 struct VoiceChip: View {
+    var size: CGFloat = 36
     var hasRecording: Bool
     var isSelected: Bool
     var isRecording: Bool
@@ -1002,10 +1095,10 @@ struct VoiceChip: View {
     var body: some View {
         Circle()
             .fill(isRecording ? Color.ampRed : AlarmTone.voice.tint.opacity(hasRecording ? 1 : 0.38))
-            .frame(width: 36, height: 36)
+            .frame(width: size, height: size)
             .overlay(
                 Image(systemName: hasRecording || isRecording ? AlarmTone.voice.systemName : "mic.fill")
-                    .font(.system(size: 13, weight: .bold))
+                    .font(.system(size: size * 0.36, weight: .bold))
                     .foregroundStyle(.black.opacity(0.8))
             )
             .overlay(
@@ -1029,7 +1122,31 @@ struct VoiceChip: View {
     }
 }
 
+/// Plays the loop box in order from its first slot; stops it while it runs.
+struct LoopPlayButton: View {
+    var isRunning: Bool
+    var accent: Color
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: isRunning ? "stop.fill" : "play.fill")
+                .font(.system(size: 18, weight: .black))
+                .foregroundStyle(isRunning ? accent : Color.black.opacity(0.85))
+                .frame(width: 52, height: 52)
+                .background(isRunning ? Color.ampPanel : accent, in: Circle())
+                .overlay(Circle().stroke(accent.opacity(isRunning ? 0.8 : 0), lineWidth: 2))
+                .shadow(color: accent.opacity(isRunning ? 0.2 : 0.4), radius: 12, y: 6)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .animation(.spring(response: 0.26, dampingFraction: 0.8), value: isRunning)
+        .accessibilityLabel(isRunning ? "Stop loop" : "Play loop")
+    }
+}
+
 struct SequenceLane: View {
+    var emptyTitle: String = "Loop"
     var sequence: [AlarmTone]
     var selectedTone: AlarmTone
     /// While a loop plays: the slot that is counting down now.
@@ -1042,19 +1159,20 @@ struct SequenceLane: View {
         GeometryReader { proxy in
             let slotSpacing: CGFloat = 6
             let contentWidth = max(0, proxy.size.width - 14)
-            let slotWidth = max(24, (contentWidth - slotSpacing * 2) / 3)
+            let capacity = AlarmViewModel.loopCapacity
+            let slotWidth = max(24, (contentWidth - slotSpacing * CGFloat(capacity - 1)) / CGFloat(capacity))
             let preview = previewSequence
 
             ZStack {
                 if sequence.isEmpty && hoverIndex == nil {
-                    Text("Loop")
+                    Text(emptyTitle)
                         .font(.paper(.medium, size: 12))
                         .foregroundStyle(Color.ampText.opacity(0.34))
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
 
                 HStack(spacing: slotSpacing) {
-                    ForEach(0..<3, id: \.self) { index in
+                    ForEach(0..<capacity, id: \.self) { index in
                         if index < preview.count {
                             switch preview[index] {
                             case .tone(let tone, let originalIndex):
@@ -1109,11 +1227,12 @@ struct SequenceLane: View {
 
     private var previewSequence: [SequencePreviewItem] {
         var items = sequence.enumerated().map { SequencePreviewItem.tone($0.element, originalIndex: $0.offset) }
-        guard let hoverIndex else { return Array(items.prefix(3)) }
+        let capacity = AlarmViewModel.loopCapacity
+        guard let hoverIndex else { return Array(items.prefix(capacity)) }
 
-        let insertIndex = min(max(hoverIndex, 0), min(sequence.count, 2))
+        let insertIndex = min(max(hoverIndex, 0), min(sequence.count, capacity - 1))
         items.insert(.placeholder, at: insertIndex)
-        return Array(items.prefix(3))
+        return Array(items.prefix(capacity))
     }
 
     private func sequenceItem(tone: AlarmTone, index: Int, width: CGFloat) -> some View {
@@ -1215,10 +1334,11 @@ private struct SequenceLaneDropDelegate: DropDelegate {
 
         let localX = max(0, xPosition - 7)
         let slotStep = max(1, slotWidth + slotSpacing)
-        let slotIndex = min(2, max(0, Int(localX / slotStep)))
+        let capacity = AlarmViewModel.loopCapacity
+        let slotIndex = min(capacity - 1, max(0, Int(localX / slotStep)))
 
         if slotIndex >= sequenceCount {
-            return min(sequenceCount, 2)
+            return min(sequenceCount, capacity - 1)
         }
 
         return slotIndex
@@ -1273,6 +1393,7 @@ extension Color {
     static let toneDing = ampRed
     static let tonePop = ampYellow
     static let toneChime = ampBlue
+    static let toneBeep = Color(red: 0.2, green: 0.86, blue: 0.5)
     static let ampBlack = Color(red: 0.005, green: 0.005, blue: 0.005)
     static let ampDial = Color(red: 0.015, green: 0.015, blue: 0.016)
     static let ampPanel = Color(red: 0.105, green: 0.108, blue: 0.11)
@@ -1289,6 +1410,7 @@ extension AlarmTone {
         case .ding: "bell.fill"
         case .pop: "circle.hexagongrid.fill"
         case .chime: "sparkles"
+        case .beep: "dot.radiowaves.left.and.right"
         case .voice: "waveform"
         }
     }
@@ -1298,6 +1420,7 @@ extension AlarmTone {
         case .ding: .toneDing
         case .pop: .tonePop
         case .chime: .toneChime
+        case .beep: .toneBeep
         case .voice: .ampText
         }
     }
