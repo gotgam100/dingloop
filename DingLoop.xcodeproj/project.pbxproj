@@ -21,9 +21,7 @@
 		AA0012010000000000000001 /* ding-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024010000000000000001 /* ding-tone.caf */; };
 		AA0012020000000000000001 /* pop-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024020000000000000001 /* pop-tone.caf */; };
 		AA0012030000000000000001 /* chime-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024030000000000000001 /* chime-tone.caf */; };
-		AA0012040000000000000001 /* ding-tone-alarmkit.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024040000000000000001 /* ding-tone-alarmkit.caf */; };
-		AA0012050000000000000001 /* pop-tone-alarmkit.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024050000000000000001 /* pop-tone-alarmkit.caf */; };
-		AA0012060000000000000001 /* chime-tone-alarmkit.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024060000000000000001 /* chime-tone-alarmkit.caf */; };
+		AA0012070000000000000001 /* beep-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024070000000000000001 /* beep-tone.caf */; };
 		AA0013010000000000000001 /* DingLoopLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0025010000000000000001 /* DingLoopLiveActivityBundle.swift */; };
 		AA0013020000000000000001 /* DingLoopLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0025020000000000000001 /* DingLoopLiveActivityWidget.swift */; };
 		AA0013030000000000000001 /* DingLoopActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020070000000000000001 /* DingLoopActivityAttributes.swift */; };
@@ -73,9 +71,7 @@
 		AA0024010000000000000001 /* ding-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ding-tone.caf"; sourceTree = "<group>"; };
 		AA0024020000000000000001 /* pop-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "pop-tone.caf"; sourceTree = "<group>"; };
 		AA0024030000000000000001 /* chime-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "chime-tone.caf"; sourceTree = "<group>"; };
-		AA0024040000000000000001 /* ding-tone-alarmkit.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ding-tone-alarmkit.caf"; sourceTree = "<group>"; };
-		AA0024050000000000000001 /* pop-tone-alarmkit.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "pop-tone-alarmkit.caf"; sourceTree = "<group>"; };
-		AA0024060000000000000001 /* chime-tone-alarmkit.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "chime-tone-alarmkit.caf"; sourceTree = "<group>"; };
+		AA0024070000000000000001 /* beep-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "beep-tone.caf"; sourceTree = "<group>"; };
 		AA0025010000000000000001 /* DingLoopLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopLiveActivityBundle.swift; sourceTree = "<group>"; };
 		AA0025020000000000000001 /* DingLoopLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopLiveActivityWidget.swift; sourceTree = "<group>"; };
 		AA0025030000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -153,9 +149,7 @@
 				AA0024010000000000000001 /* ding-tone.caf */,
 				AA0024020000000000000001 /* pop-tone.caf */,
 				AA0024030000000000000001 /* chime-tone.caf */,
-				AA0024040000000000000001 /* ding-tone-alarmkit.caf */,
-				AA0024050000000000000001 /* pop-tone-alarmkit.caf */,
-				AA0024060000000000000001 /* chime-tone-alarmkit.caf */,
+				AA0024070000000000000001 /* beep-tone.caf */,
 			);
 			path = Sounds;
 			sourceTree = "<group>";
@@ -262,9 +256,7 @@
 				AA0012010000000000000001 /* ding-tone.caf in Resources */,
 				AA0012020000000000000001 /* pop-tone.caf in Resources */,
 				AA0012030000000000000001 /* chime-tone.caf in Resources */,
-				AA0012040000000000000001 /* ding-tone-alarmkit.caf in Resources */,
-				AA0012050000000000000001 /* pop-tone-alarmkit.caf in Resources */,
-				AA0012060000000000000001 /* chime-tone-alarmkit.caf in Resources */,
+				AA0012070000000000000001 /* beep-tone.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -433,7 +425,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = DingLoop/DingLoop.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = SB2Z6HL579;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -444,7 +436,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop;
 				PRODUCT_NAME = DingLoop;
 				SDKROOT = iphoneos;
@@ -464,7 +456,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = DingLoop/DingLoop.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = SB2Z6HL579;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -475,7 +467,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop;
 				PRODUCT_NAME = DingLoop;
 				SDKROOT = iphoneos;
@@ -495,7 +487,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = DingLoopLiveActivity/DingLoopLiveActivityExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SB2Z6HL579;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DingLoopLiveActivity/Info.plist;
@@ -505,7 +497,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop.liveactivity;
 				PRODUCT_NAME = DingLoopLiveActivityExtension;
 				SDKROOT = iphoneos;
@@ -526,7 +518,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = DingLoopLiveActivity/DingLoopLiveActivityExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = SB2Z6HL579;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DingLoopLiveActivity/Info.plist;
@@ -536,7 +528,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.baekmac.dingloop.liveactivity;
 				PRODUCT_NAME = DingLoopLiveActivityExtension;
 				SDKROOT = iphoneos;

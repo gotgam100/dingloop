@@ -69,10 +69,30 @@ private enum AppLanguage {
         }
     }
 
-    var liveModeTitle: String {
+    var moreAppsTitle: String {
         switch self {
-        case .korean: "라이브모드"
-        case .english: "Live Mode"
+        case .korean: "개발자의 다른 앱"
+        case .english: "More Apps by the Developer"
+        }
+    }
+
+    var emptyLoopTitle: String {
+        switch self {
+        case .korean: "Loop (여기로 드래그)"
+        case .english: "Loop (drag here)"
+        }
+    }
+
+    func hintText(_ hint: LoopHint) -> String {
+        switch (self, hint) {
+        case (.korean, .lowVolume): "미디어 볼륨이 낮아요"
+        case (.english, .lowVolume): "Media volume is low"
+        case (.korean, .holdToRecord): "Voice를 길게 눌러 녹음하세요"
+        case (.english, .holdToRecord): "Hold Voice to record"
+        case (.korean, .recording): "녹음 중 · 손을 떼면 저장돼요"
+        case (.english, .recording): "Recording · release to save"
+        case (.korean, .recordingTooShort): "조금 더 길게 눌러 녹음하세요"
+        case (.english, .recordingTooShort): "Hold a little longer to record"
         }
     }
 }
@@ -140,43 +160,29 @@ struct ContentView: View {
             Text("DingLoop")
                 .font(.paper(.semiBold, size: 17))
                 .foregroundStyle(Color.ampText.opacity(0.82))
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
-                        isInfoPresented.toggle()
-                    }
-                }
 
             Spacer()
 
             Button {
-                withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-                    viewModel.toggleRunMode()
+                withAnimation(.spring(response: 0.36, dampingFraction: 0.82)) {
+                    isInfoPresented.toggle()
                 }
             } label: {
-                HStack(spacing: 8) {
-                    if viewModel.runMode == .live {
-                        Text(selectedLanguage.liveModeTitle)
-                            .font(.paper(.bold, size: 11))
-                            .foregroundStyle(Color.ampText.opacity(0.72))
-                            .transition(.move(edge: .trailing).combined(with: .opacity))
-                    }
-
-                    Rectangle()
-                        .fill(viewModel.runMode == .live ? Color.ampText : accentColor)
-                        .frame(width: 13, height: 13)
-                        .shadow(color: accentColor.opacity(0.22), radius: 8, y: 5)
-                        .rotationEffect(.degrees(viewModel.runMode == .live ? 45 : 0))
-                }
+                Image(systemName: isInfoPresented ? "xmark" : "gearshape.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.ampText.opacity(0.72))
+                    .frame(width: 40, height: 40)
+                    .contentShape(Rectangle())
+                    .contentTransition(.symbolEffect(.replace))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(viewModel.runMode == .live ? "Switch to stop mode" : "Switch to live mode")
+            .accessibilityLabel(selectedLanguage.settingsTitle)
         }
     }
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: 18)
+            Spacer(minLength: 6)
 
             ClockDial(
                 intervalMinutes: $viewModel.intervalMinutes,
@@ -200,11 +206,11 @@ struct ContentView: View {
 
             quickIntervals
                 .padding(.horizontal, 26)
-                .padding(.bottom, 18)
+                .padding(.bottom, 14)
 
             controlDock
                 .padding(.horizontal, 22)
-                .padding(.bottom, 22)
+                .padding(.bottom, 30)
         }
     }
 
@@ -222,6 +228,7 @@ struct ContentView: View {
                 infoRow(selectedLanguage.appInfoTitle, value: appVersion)
                 userGuideRow
                 linkRow(selectedLanguage.termsTitle)
+                linkRow(selectedLanguage.moreAppsTitle, action: openDeveloperApps)
             }
             .padding(.horizontal, 26)
 
@@ -419,51 +426,90 @@ struct ContentView: View {
             [
                 (
                     "DingLoop",
-                    "DingLoop는 여러가지 알람을 루프 형식으로 반복해서 사용할 수 있는 앱입니다."
+                    "DingLoop는 여러 알람 소리를 정한 순서대로 계속 반복해 주는 앱입니다. 화면이 꺼지거나 다른 앱을 쓰는 중에도, 멈출 때까지 중단 없이 이어집니다."
                 ),
                 (
-                    "1. 기본모드와 라이브모드",
-                    "화면 오른쪽 상단의 점으로 모드를 전환합니다.\n\n'기본모드'는 일반적인 알람처럼 잠금화면, 집중모드, 수면모드, 백그라운드, 앱 열림시 모두 알람이 뜨며 중단 버튼을 눌러야만 다음 루프로 진행됩니다.\n\n'라이브모드'는 앱이 열려있는 상태에서만 가능하며, 라이브모드에서는 중단 버튼 없이 알람 루프가 진행됩니다. 또한 목소리를 녹음하여 알람으로 사용할 수도 있습니다."
+                    "1. 간격 정하기",
+                    "소리 버튼을 탭해 고른 뒤, 작고 동그란 핸들을 돌리거나 아래 숫자 버튼을 눌러 간격을 정합니다. 소리마다 간격이 따로 저장됩니다. 분/초 단위는 오른쪽 위 설정에서 고를 수 있고, 한 바퀴는 60단위, 최대 360단위입니다."
                 ),
                 (
-                    "2. 플레이 및 정지",
-                    "설정에서 시간 단위를 분 또는 초로 고를 수 있습니다. 작고 동그란 핸들을 돌려 시간을 설정한 뒤, 가운데 숫자를 꾹 눌러 플레이 및 정지를 작동시킵니다. 한 바퀴당 60단위, 최대 360단위까지 가능합니다."
+                    "2. 루프 만들기",
+                    "윗줄의 소리 버튼(Ding, Pop, Chime, Beep, Voice)을 아랫줄 루프박스로 끌어다 놓으면, 놓은 순서대로 반복됩니다. 최대 4개까지 넣을 수 있고, 루프박스의 칸을 탭하면 뺄 수 있습니다."
                 ),
                 (
-                    "3. 루프 등록",
-                    "화면 하단에는 색상으로 구분된 알람 소리 버튼이 있습니다. 이를 드래그하여 오른쪽 루프박스에 등록할 수 있습니다. 루프박스에 등록된 순서대로 알람은 계속 반복됩니다."
+                    "3. 시작과 정지",
+                    "루프박스 오른쪽의 ▶ 버튼을 누르면 1번 칸부터 순서대로 시작하고, ■를 누르면 멈춥니다. 가운데 숫자를 꾹 눌러도 시작하거나 멈출 수 있으며, 이때는 지금 고른 소리의 칸부터 시작합니다. 가운데 숫자를 두 번 탭하면 일시정지합니다. 루프가 도는 동안에는 지금 울릴 칸이 표시되고, 소리 버튼과 루프박스는 바꿀 수 없습니다."
+                ),
+                (
+                    "4. 목소리 녹음",
+                    "Voice 버튼을 길게 누르는 동안 녹음되고, 손을 떼면 저장됩니다(최대 10초). 길게 누른 채 루프박스로 끌면 녹음하지 않고 루프에 넣습니다. 저장한 목소리도 다른 소리처럼 루프에 넣을 수 있습니다."
+                ),
+                (
+                    "5. 알아두세요",
+                    "소리는 벨소리가 아닌 미디어 볼륨을 따릅니다. 무음 모드에서도 울리지만 미디어 볼륨이 0이면 들리지 않습니다. 이어폰이 연결되어 있으면 이어폰으로 나옵니다. 루프 중에는 배터리를 조금 더 사용합니다. 잠금화면의 DingLoop 표시를 밀어서 지우거나 앱을 완전히 종료하면 루프도 멈춥니다."
                 )
             ]
         case .english:
             [
                 (
                     "DingLoop",
-                    "DingLoop lets you repeat multiple alarms in a loop."
+                    "DingLoop plays your alarm sounds over and over in the order you set. It keeps going while the screen is off or you use other apps, until you stop it."
                 ),
                 (
-                    "1. Stop Mode and Live Mode",
-                    "Switch modes with the dot at the top right of the screen.\n\n'Stop Mode' works like a standard alarm. The alarm appears on the Lock Screen, in Focus mode, Sleep mode, background, and while the app is open. You must press Stop to move to the next loop.\n\n'Live Mode' works only while the app is open. In Live Mode, the alarm loop continues without pressing Stop. You can also record your voice and use it as an alarm sound."
+                    "1. Setting the Interval",
+                    "Tap a sound button to choose it, then turn the small round handle or tap a number button to set its interval. Each sound keeps its own interval. Choose minutes or seconds in Settings (top right). One full turn is 60 units, up to 360."
                 ),
                 (
-                    "2. Play and Stop",
-                    "Choose minutes or seconds in Settings. Turn the small circular handle to set the time, then press and hold the center number to play or stop. One full turn equals 60 units, up to 360 units."
+                    "2. Building a Loop",
+                    "Drag sound buttons from the top row (Ding, Pop, Chime, Beep, Voice) into the loop box below; they repeat in the order you place them. The loop box holds up to 4 sounds. Tap a slot to remove it."
                 ),
                 (
-                    "3. Registering Loops",
-                    "At the bottom of the screen, alarm sounds are shown as color-coded buttons. Drag them into the loop box on the right. Alarms repeat in the order registered in the loop box."
+                    "3. Start and Stop",
+                    "Tap ▶ beside the loop box to start from the first slot, and ■ to stop. You can also press and hold the center number to start or stop; this starts from the slot of the sound you have chosen. Double-tap the center number to pause. While the loop runs, the slot that plays next is highlighted, and the sound buttons and loop box can't be changed."
+                ),
+                (
+                    "4. Recording Your Voice",
+                    "Press and hold the Voice button to record, and release to save (up to 10 seconds). Hold and drag it into the loop box to add it without recording. Your voice can join the loop like any other sound."
+                ),
+                (
+                    "5. Good to Know",
+                    "Sounds follow media volume, not ringer volume. They play in Silent mode, but not with media volume at zero. With earphones connected, they play through the earphones. Looping uses a little more battery. Swiping away DingLoop on the Lock Screen, or quitting the app, stops the loop."
                 )
             ]
         }
     }
 
-    private func linkRow(_ title: String) -> some View {
-        Button {
-            guard var components = URLComponents(url: legalPageURL, resolvingAgainstBaseURL: false) else {
-                openURL(legalPageURL)
-                return
+    private func openLegalPage() {
+        guard var components = URLComponents(url: legalPageURL, resolvingAgainstBaseURL: false) else {
+            openURL(legalPageURL)
+            return
+        }
+        components.fragment = selectedLanguage == .korean ? "ko" : "en"
+        openURL(components.url ?? legalPageURL)
+    }
+
+    /// Opens the App Store searching for the developer's apps.
+    private func openDeveloperApps() {
+        let term = "Seunghwa Baek".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "Seunghwa%20Baek"
+        let webSearch = URL(string: "https://apps.apple.com/search?term=\(term)")!
+        guard let appStoreSearch = URL(string: "itms-apps://search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?media=software&term=\(term)") else {
+            openURL(webSearch)
+            return
+        }
+        openURL(appStoreSearch) { accepted in
+            if !accepted {
+                openURL(webSearch)
             }
-            components.fragment = selectedLanguage == .korean ? "ko" : "en"
-            openURL(components.url ?? legalPageURL)
+        }
+    }
+
+    private func linkRow(_ title: String, action: (() -> Void)? = nil) -> some View {
+        Button {
+            if let action {
+                action()
+            } else {
+                openLegalPage()
+            }
         } label: {
             HStack {
                 Text(title)
@@ -502,125 +548,102 @@ struct ContentView: View {
         }
     }
 
-    private var controlDock: some View {
-        HStack(spacing: 10) {
-            toneControls
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 8)
-            .background(Color.black.opacity(0.22), in: Capsule())
+    private var loopLane: some View {
+        SequenceLane(
+            emptyTitle: selectedLanguage.emptyLoopTitle,
+            sequence: viewModel.alarmSequence,
+            selectedTone: viewModel.alarmTone,
+            activeIndex: viewModel.activeLoopIndex,
+            hoverIndex: $loopHoverIndex,
+            removeAction: viewModel.removeSequenceItem,
+            insertAction: viewModel.insertToneToSequence
+        )
+        .frame(maxWidth: .infinity)
+        .allowsHitTesting(!viewModel.isRunning)
+    }
 
-            SequenceLane(
-                sequence: viewModel.alarmSequence,
-                selectedTone: viewModel.alarmTone,
-                hoverIndex: $loopHoverIndex,
-                removeAction: viewModel.removeSequenceItem,
-                insertAction: viewModel.insertToneToSequence
-            )
-            .frame(maxWidth: .infinity)
+    /// Chips on the first row; the loop box and its play button on the second.
+    private var controlDock: some View {
+        VStack(spacing: 12) {
+            toneControls(chipSize: 46, spacing: 14)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Color.black.opacity(0.22), in: Capsule())
+
+            HStack(spacing: 10) {
+                loopLane
+                // Colored by the loop box's first tone, not by the selected chip.
+                LoopPlayButton(isRunning: viewModel.isRunning, accent: viewModel.alarmSequence.first?.tint ?? Color.ampText) {
+                    viewModel.toggleLoopFromStart()
+                }
+            }
         }
-        .padding(12)
-        .background(Color.ampPanel.opacity(0.96), in: Capsule())
+        .overlay(alignment: .top) {
+            hintBubble
+                .offset(y: -122)
+        }
+        .animation(.spring(response: 0.26, dampingFraction: 0.84), value: viewModel.hint)
+        .padding(14)
+        .background(Color.ampPanel.opacity(0.96), in: RoundedRectangle(cornerRadius: 36, style: .continuous))
         .shadow(color: .black.opacity(0.38), radius: 22, y: 14)
     }
 
-    @ViewBuilder
-    private var toneControls: some View {
-        ZStack {
-            liveToneControls
-                .opacity(viewModel.runMode == .live ? 1 : 0)
-                .allowsHitTesting(viewModel.runMode == .live)
-
-            stopToneControls
-                .opacity(viewModel.runMode == .stop ? 1 : 0)
-                .allowsHitTesting(viewModel.runMode == .stop)
-        }
-        .transaction { transaction in
-            transaction.animation = nil
-        }
-    }
-
-    private var liveToneControls: some View {
-        HStack(spacing: 8) {
-            ToneChip(tone: viewModel.alarmTone == .voice ? .ding : viewModel.alarmTone, isSelected: viewModel.alarmTone != .voice) {
-                viewModel.cycleAlarmTone()
-            }
-            .simultaneousGesture(fastToneDragGesture(for: viewModel.alarmTone == .voice ? .ding : viewModel.alarmTone))
-
-            Button {
-                viewModel.handleVoiceButtonTap()
-            } label: {
-                Circle()
-                    .fill(voiceButtonFill)
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: voiceButtonIcon)
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(Color.black.opacity(0.82))
-                    )
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white.opacity(viewModel.isVoiceRecordArmed || viewModel.isRecordingVoice ? 0.95 : 0), lineWidth: 2)
-                    )
-                    .shadow(
-                        color: voiceButtonFill.opacity(viewModel.isRecordingVoice ? 0.5 : 0.22),
-                        radius: viewModel.isRecordingVoice ? 12 : 8,
-                        y: 6
-                    )
-            }
-            .buttonStyle(.plain)
-            .simultaneousGesture(fastToneDragGesture(for: .voice))
-
-            Button {
-                viewModel.previewSelectedSound()
-            } label: {
-                Circle()
-                    .fill(Color.ampPanel)
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(Color.ampText.opacity(0.82))
-                    )
-            }
-            .buttonStyle(.plain)
-        }
-        .animation(.spring(response: 0.24, dampingFraction: 0.78), value: viewModel.isVoiceRecordArmed)
-        .animation(.spring(response: 0.24, dampingFraction: 0.78), value: viewModel.isRecordingVoice)
-    }
-
-    private var stopToneControls: some View {
-        HStack(spacing: 8) {
-            ForEach(AlarmTone.builtInCases) { tone in
-                ToneChip(tone: tone, isSelected: tone == viewModel.alarmTone) {
+    /// Ding, Pop, Chime and Voice, always in the same place.
+    /// Tap: select and preview. Drag: add to the loop box. Hold Voice: record.
+    /// Frozen while a loop runs.
+    private func toneControls(chipSize: CGFloat, spacing: CGFloat) -> some View {
+        HStack(spacing: spacing) {
+            ForEach([AlarmTone.ding, .pop, .chime, .beep], id: \.self) { tone in
+                ToneChip(tone: tone, isSelected: tone == viewModel.alarmTone, size: chipSize) {
                     viewModel.selectAlarmTone(tone)
-                    viewModel.previewDefaultSound()
                 }
                 .simultaneousGesture(fastToneDragGesture(for: tone))
             }
+
+            VoiceChip(
+                size: chipSize,
+                hasRecording: viewModel.hasVoiceRecording,
+                isSelected: viewModel.alarmTone == .voice,
+                isRecording: viewModel.isRecordingVoice,
+                onTap: { viewModel.selectAlarmTone(.voice) },
+                onPressStart: { viewModel.voicePressBegan() },
+                onHoldStart: { viewModel.beginHoldRecording() },
+                onHoldEnd: { viewModel.endHoldRecording() }
+            )
+            .simultaneousGesture(fastToneDragGesture(for: .voice))
         }
+        .fixedSize()
+        .opacity(viewModel.isRunning ? 0.42 : 1)
+        .allowsHitTesting(!viewModel.isRunning)
+        .animation(.easeOut(duration: 0.18), value: viewModel.isRunning)
     }
 
-    private var voiceButtonFill: Color {
-        if viewModel.isRecordingVoice {
-            return .ampRed
+    @ViewBuilder
+    private var hintBubble: some View {
+        if let hint = viewModel.hint {
+            Text(selectedLanguage.hintText(hint))
+                .font(.paper(.semiBold, size: 13))
+                .foregroundStyle(hint == .recording ? Color.black : Color.ampText)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(hint == .recording ? Color.ampRed : Color.ampPanel, in: Capsule())
+                .shadow(color: .black.opacity(0.36), radius: 14, y: 8)
+                .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                .allowsHitTesting(false)
         }
-        return Color.ampText.opacity(viewModel.hasVoiceRecording || viewModel.isVoiceRecordArmed ? 0.9 : 0.34)
-    }
-
-    private var voiceButtonIcon: String {
-        if viewModel.isRecordingVoice {
-            return "stop.fill"
-        }
-        if viewModel.isVoiceRecordArmed {
-            return "record.circle.fill"
-        }
-        return "waveform"
     }
 
     private func fastToneDragGesture(for tone: AlarmTone) -> some Gesture {
         DragGesture(minimumDistance: 4, coordinateSpace: .named("DingLoopDragSpace"))
             .onChanged { value in
+                guard !viewModel.isRunning else { return }
+                if tone == .voice {
+                    // Holding Voice to drag it must not leave a recording behind.
+                    viewModel.cancelVoicePress()
+                    guard viewModel.hasVoiceRecording else { return }
+                } else if viewModel.isRecordingVoice {
+                    return
+                }
                 draggingTone = tone
                 dragLocation = value.location
                 updateLoopHover(at: value.location)
@@ -631,7 +654,7 @@ struct ContentView: View {
                     loopHoverIndex = nil
                 }
 
-                guard loopLaneFrame.contains(value.location) else { return }
+                guard draggingTone != nil, loopLaneFrame.contains(value.location) else { return }
                 viewModel.insertToneToSequence(tone, at: loopInsertIndex(for: value.location))
             }
     }
@@ -649,11 +672,12 @@ struct ContentView: View {
         guard !viewModel.alarmSequence.isEmpty else { return 0 }
 
         let relativeX = min(max(location.x - loopLaneFrame.minX, 0), max(loopLaneFrame.width, 1))
-        let slotWidth = max(loopLaneFrame.width / 3, 1)
-        let slotIndex = min(2, max(0, Int(relativeX / slotWidth)))
+        let capacity = AlarmViewModel.loopCapacity
+        let slotWidth = max(loopLaneFrame.width / CGFloat(capacity), 1)
+        let slotIndex = min(capacity - 1, max(0, Int(relativeX / slotWidth)))
 
         if slotIndex >= viewModel.alarmSequence.count {
-            return min(viewModel.alarmSequence.count, 2)
+            return min(viewModel.alarmSequence.count, capacity - 1)
         }
 
         return slotIndex
@@ -1011,16 +1035,17 @@ struct IconButton: View {
 struct ToneChip: View {
     var tone: AlarmTone
     var isSelected: Bool
+    var size: CGFloat = 36
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Circle()
                 .fill(tone.tint)
-                .frame(width: 40, height: 40)
+                .frame(width: size, height: size)
                 .overlay(
                     Image(systemName: tone.systemName)
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: size * 0.36, weight: .bold))
                         .foregroundStyle(.black.opacity(0.8))
                 )
                 .overlay(
@@ -1033,9 +1058,77 @@ struct ToneChip: View {
     }
 }
 
+/// The Voice chip. Tap selects and previews the recording; holding it records
+/// (release to save, up to 10 seconds).
+struct VoiceChip: View {
+    var size: CGFloat = 36
+    var hasRecording: Bool
+    var isSelected: Bool
+    var isRecording: Bool
+    var onTap: () -> Void
+    var onPressStart: () -> Void
+    var onHoldStart: () -> Void
+    var onHoldEnd: () -> Void
+
+    var body: some View {
+        Circle()
+            .fill(isRecording ? Color.ampRed : AlarmTone.voice.tint.opacity(hasRecording ? 1 : 0.38))
+            .frame(width: size, height: size)
+            .overlay(
+                Image(systemName: hasRecording || isRecording ? AlarmTone.voice.systemName : "mic.fill")
+                    .font(.system(size: size * 0.36, weight: .bold))
+                    .foregroundStyle(.black.opacity(0.8))
+            )
+            .overlay(
+                Circle()
+                    .stroke(Color.white.opacity(isSelected || isRecording ? 0.95 : 0.28), lineWidth: isSelected || isRecording ? 2 : 1)
+            )
+            .scaleEffect(isRecording ? 1.14 : 1)
+            .shadow(color: (isRecording ? Color.ampRed : AlarmTone.voice.tint).opacity(isRecording ? 0.6 : 0.28), radius: isRecording ? 14 : 10, y: 6)
+            .animation(.spring(response: 0.24, dampingFraction: 0.7), value: isRecording)
+            .contentShape(Circle())
+            .onTapGesture(perform: onTap)
+            .onLongPressGesture(minimumDuration: 0.35, maximumDistance: 40, perform: onHoldStart) { isPressing in
+                if isPressing {
+                    onPressStart()
+                } else {
+                    onHoldEnd()
+                }
+            }
+            .accessibilityLabel("Voice")
+            .accessibilityHint("Hold to record")
+    }
+}
+
+/// Plays the loop box in order from its first slot; stops it while it runs.
+struct LoopPlayButton: View {
+    var isRunning: Bool
+    var accent: Color
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: isRunning ? "stop.fill" : "play.fill")
+                .font(.system(size: 18, weight: .black))
+                .foregroundStyle(isRunning ? accent : Color.black.opacity(0.85))
+                .frame(width: 52, height: 52)
+                .background(isRunning ? Color.ampPanel : accent, in: Circle())
+                .overlay(Circle().stroke(accent.opacity(isRunning ? 0.8 : 0), lineWidth: 2))
+                .shadow(color: accent.opacity(isRunning ? 0.2 : 0.4), radius: 12, y: 6)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .animation(.spring(response: 0.26, dampingFraction: 0.8), value: isRunning)
+        .accessibilityLabel(isRunning ? "Stop loop" : "Play loop")
+    }
+}
+
 struct SequenceLane: View {
+    var emptyTitle: String = "Loop"
     var sequence: [AlarmTone]
     var selectedTone: AlarmTone
+    /// While a loop plays: the slot that is counting down now.
+    var activeIndex: Int?
     @Binding var hoverIndex: Int?
     var removeAction: (Int) -> Void
     var insertAction: (AlarmTone, Int) -> Void
@@ -1044,19 +1137,20 @@ struct SequenceLane: View {
         GeometryReader { proxy in
             let slotSpacing: CGFloat = 6
             let contentWidth = max(0, proxy.size.width - 14)
-            let slotWidth = max(24, (contentWidth - slotSpacing * 2) / 3)
+            let capacity = AlarmViewModel.loopCapacity
+            let slotWidth = max(24, (contentWidth - slotSpacing * CGFloat(capacity - 1)) / CGFloat(capacity))
             let preview = previewSequence
 
             ZStack {
                 if sequence.isEmpty && hoverIndex == nil {
-                    Text("Loop")
+                    Text(emptyTitle)
                         .font(.paper(.medium, size: 12))
                         .foregroundStyle(Color.ampText.opacity(0.34))
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
 
                 HStack(spacing: slotSpacing) {
-                    ForEach(0..<3, id: \.self) { index in
+                    ForEach(0..<capacity, id: \.self) { index in
                         if index < preview.count {
                             switch preview[index] {
                             case .tone(let tone, let originalIndex):
@@ -1111,23 +1205,38 @@ struct SequenceLane: View {
 
     private var previewSequence: [SequencePreviewItem] {
         var items = sequence.enumerated().map { SequencePreviewItem.tone($0.element, originalIndex: $0.offset) }
-        guard let hoverIndex else { return Array(items.prefix(3)) }
+        let capacity = AlarmViewModel.loopCapacity
+        guard let hoverIndex else { return Array(items.prefix(capacity)) }
 
-        let insertIndex = min(max(hoverIndex, 0), min(sequence.count, 2))
+        let insertIndex = min(max(hoverIndex, 0), min(sequence.count, capacity - 1))
         items.insert(.placeholder, at: insertIndex)
-        return Array(items.prefix(3))
+        return Array(items.prefix(capacity))
     }
 
     private func sequenceItem(tone: AlarmTone, index: Int, width: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(tone.tint.opacity(tone == selectedTone ? 0.94 : 0.68))
+        let isActive = activeIndex == index
+        let fillOpacity: Double = if let activeIndex {
+            index == activeIndex ? 1 : 0.32
+        } else {
+            tone == selectedTone ? 0.94 : 0.68
+        }
+
+        return RoundedRectangle(cornerRadius: 8)
+            .fill(tone.tint.opacity(fillOpacity))
             .frame(width: width, height: 34)
             .overlay(
                 Text("\(index + 1)")
                     .font(.paper(.bold, size: 12))
-                    .foregroundStyle(.black.opacity(0.85))
+                    .foregroundStyle(.black.opacity(isActive || activeIndex == nil ? 0.85 : 0.5))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.white.opacity(isActive ? 0.95 : 0), lineWidth: 2)
+            )
+            .scaleEffect(isActive ? 1.06 : 1)
+            .shadow(color: tone.tint.opacity(isActive ? 0.55 : 0), radius: 8)
+            .animation(.spring(response: 0.3, dampingFraction: 0.75), value: activeIndex)
     }
 }
 
@@ -1203,10 +1312,11 @@ private struct SequenceLaneDropDelegate: DropDelegate {
 
         let localX = max(0, xPosition - 7)
         let slotStep = max(1, slotWidth + slotSpacing)
-        let slotIndex = min(2, max(0, Int(localX / slotStep)))
+        let capacity = AlarmViewModel.loopCapacity
+        let slotIndex = min(capacity - 1, max(0, Int(localX / slotStep)))
 
         if slotIndex >= sequenceCount {
-            return min(sequenceCount, 2)
+            return min(sequenceCount, capacity - 1)
         }
 
         return slotIndex
@@ -1261,6 +1371,7 @@ extension Color {
     static let toneDing = ampRed
     static let tonePop = ampYellow
     static let toneChime = ampBlue
+    static let toneBeep = Color(red: 0.2, green: 0.86, blue: 0.5)
     static let ampBlack = Color(red: 0.005, green: 0.005, blue: 0.005)
     static let ampDial = Color(red: 0.015, green: 0.015, blue: 0.016)
     static let ampPanel = Color(red: 0.105, green: 0.108, blue: 0.11)
@@ -1277,6 +1388,7 @@ extension AlarmTone {
         case .ding: "bell.fill"
         case .pop: "circle.hexagongrid.fill"
         case .chime: "sparkles"
+        case .beep: "dot.radiowaves.left.and.right"
         case .voice: "waveform"
         }
     }
@@ -1286,6 +1398,7 @@ extension AlarmTone {
         case .ding: .toneDing
         case .pop: .tonePop
         case .chime: .toneChime
+        case .beep: .toneBeep
         case .voice: .ampText
         }
     }

@@ -22,20 +22,20 @@
     <div class="top"><a class="back" href="./index.html">← DingLoop</a></div>
     <article class="panel">
       <h1>개인정보 처리방침</h1>
-      <p class="date">시행일: 2026년 5월 31일</p>
+      <p class="date">시행일: 2026년 10월 25일</p>
 
       <p>DingLoop 개발자(이하 "회사")는 이용자의 개인정보를 중요하게 생각하며 관련 법령을 준수합니다.</p>
 
       <h2>1. 수집하는 정보</h2>
       <ul>
         <li>기본적으로 회원가입 없이 동작하며, 이름/이메일 등 식별 개인정보를 수집하지 않습니다.</li>
-        <li>알람 간격, 선택 사운드 등 설정값은 기기 내부(UserDefaults)에 저장됩니다.</li>
-        <li>알림 기능 제공을 위해 알림 권한 상태를 확인하고 로컬 알림을 예약합니다.</li>
+        <li>알람 간격, 선택 사운드, 루프 순서 등 설정값은 기기 내부(UserDefaults)에 저장됩니다.</li>
+        <li>사용자가 녹음한 목소리는 알람 소리로 쓰기 위해 기기 안에만 저장되며, 외부로 전송되지 않습니다.</li>
       </ul>
 
       <h2>2. 이용 목적</h2>
       <ul>
-        <li>반복 알람 기능 제공</li>
+        <li>반복 알람(루프) 기능 제공</li>
         <li>앱 재실행 시 사용자 설정 복원</li>
         <li>앱 안정성 및 품질 유지</li>
       </ul>
@@ -48,8 +48,9 @@
 
       <h2>5. 외부 서비스 및 권한</h2>
       <ul>
-        <li><strong>알림 권한:</strong> 잠금/백그라운드 상태 알람 제공을 위해 사용</li>
-        <li><strong>Apple 시스템:</strong> 로컬 알림 전달은 iOS 시스템 정책을 따릅니다.</li>
+        <li><strong>마이크 권한:</strong> 목소리를 녹음해 알람 소리로 쓸 때만 사용</li>
+        <li><strong>백그라운드 오디오:</strong> 잠금/백그라운드 상태에서도 루프 소리를 재생하기 위해 사용</li>
+        <li><strong>실시간 현황(Live Activity):</strong> 잠금화면과 다이나믹 아일랜드에 루프 상태를 표시하기 위해 사용</li>
       </ul>
 
       <h2>6. 아동 개인정보 보호</h2>
@@ -61,7 +62,7 @@
       <h2>8. 고지 의무</h2>
       <p>방침이 변경되는 경우 이 페이지를 통해 공지합니다.</p>
 
-      <p class="foot">본 방침은 2026년 5월 31일부터 적용됩니다.</p>
+      <p class="foot">본 방침은 2026년 10월 25일부터 적용됩니다.</p>
       <p class="foot">© 2026 DingLoop. All rights reserved.<br /><a href="mailto:yogotgam@gmail.com">yogotgam@gmail.com</a></p>
     </article>
   </main>

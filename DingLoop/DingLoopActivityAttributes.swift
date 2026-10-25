@@ -1,30 +1,13 @@
 import ActivityKit
-import AlarmKit
 import Foundation
 
+/// The running loop, shown on the Lock Screen and in the Dynamic Island.
 struct DingLoopActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
-        var startDate: Date
-        var endDate: Date
-        var intervalMinutes: Int
-        var timeUnitRawValue: String
-        var toneName: String
-        var accentName: String
-        var remainingSeconds: Int
-        var isRunning: Bool
+        /// The tones in loop order, as `AlarmTone` raw values.
+        var toneSequence: [String]
+        /// The tone titles for display, e.g. "Ding · Pop · Voice".
+        var toneNames: String
         var isPaused: Bool
     }
-
-    var intervalMinutes: Int
-    var timeUnitRawValue: String
-    var toneName: String
-    var accentName: String
-}
-
-@available(iOS 26.0, *)
-struct DingLoopAlarmMetadata: AlarmMetadata {
-    var intervalMinutes: Int
-    var timeUnitRawValue: String
-    var toneName: String
-    var accentName: String
 }
