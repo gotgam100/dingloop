@@ -1,6 +1,8 @@
 import ActivityKit
 import Foundation
 
+/// Shows the running loop on the Lock Screen and in the Dynamic Island:
+/// which tones loop and whether it is paused.
 @MainActor
 final class LiveActivityController {
     /// Called when the person removes the Live Activity (swipes it away on the
@@ -24,104 +26,22 @@ final class LiveActivityController {
         }
     }
 
-    // MARK: - Loop (live mode)
-
-    /// Shows the running loop: which tones loop and whether it is paused.
-    /// Call it only when the loop starts, pauses or resumes — all done with the app on screen.
+    /// Call only when the loop starts, pauses or resumes — all done with the app on screen.
     func showLoop(sequence: [AlarmTone], isPaused: Bool) {
         let tones = sequence.isEmpty ? [AlarmTone.ding] : sequence
-        let now = Date()
         let state = DingLoopActivityAttributes.ContentState(
-            startDate: now,
-            endDate: now,
-            intervalMinutes: 0,
-            timeUnitRawValue: AlarmTimeUnit.seconds.rawValue,
-            toneName: tones.map(\.title).joined(separator: " · "),
-            accentName: tones[0].rawValue,
-            remainingSeconds: 0,
-            isRunning: !isPaused,
-            isPaused: isPaused,
             toneSequence: tones.map(\.rawValue),
-            isLoop: true
-        )
-        let attributes = DingLoopActivityAttributes(
-            intervalMinutes: 0,
-            timeUnitRawValue: AlarmTimeUnit.seconds.rawValue,
-            toneName: state.toneName,
-            accentName: state.accentName
-        )
-        apply(state, attributes: attributes)
-    }
-
-    // MARK: - Single countdown (stop-mode fallback when AlarmKit is unavailable)
-
-    func start(
-        intervalMinutes: Int,
-        timeUnit: AlarmTimeUnit,
-        tone: AlarmTone,
-        remainingSeconds: Int? = nil,
-        isPaused: Bool = false
-    ) {
-        update(
-            intervalMinutes: intervalMinutes,
-            timeUnit: timeUnit,
-            remainingSeconds: remainingSeconds ?? intervalMinutes * timeUnit.secondsMultiplier,
-            tone: tone,
+            toneNames: tones.map(\.title).joined(separator: " · "),
             isPaused: isPaused
         )
-    }
+        let content = ActivityContent(state: state, staleDate: nil)
 
-    func update(intervalMinutes: Int, timeUnit: AlarmTimeUnit, remainingSeconds: Int, tone: AlarmTone, isPaused: Bool = false) {
-        let now = Date()
-        let seconds = max(0, remainingSeconds)
-        let state = DingLoopActivityAttributes.ContentState(
-            startDate: now,
-            endDate: now.addingTimeInterval(TimeInterval(seconds)),
-            intervalMinutes: intervalMinutes,
-            timeUnitRawValue: timeUnit.rawValue,
-            toneName: tone.title,
-            accentName: tone.rawValue,
-            remainingSeconds: seconds,
-            isRunning: true,
-            isPaused: isPaused,
-            toneSequence: [tone.rawValue],
-            isLoop: false
-        )
-        let attributes = DingLoopActivityAttributes(
-            intervalMinutes: intervalMinutes,
-            timeUnitRawValue: timeUnit.rawValue,
-            toneName: tone.title,
-            accentName: tone.rawValue
-        )
-        apply(state, attributes: attributes)
-    }
-
-    // MARK: - Ending
-
-    /// Ends the activities showing right now. Ones started after this call are left alone.
-    func end() {
-        let showing = Activity<DingLoopActivityAttributes>.activities
-        activity = nil
-        guard !showing.isEmpty else { return }
-
-        for activity in showing {
-            let finalContent = activity.content
-            Task {
-                await activity.end(finalContent, dismissalPolicy: .immediate)
-            }
-        }
-    }
-
-    // MARK: - Internals
-
-    private func apply(_ state: DingLoopActivityAttributes.ContentState, attributes: DingLoopActivityAttributes) {
         if activity != nil, !ActivityAuthorizationInfo().areActivitiesEnabled {
             activity = nil
             onDismissedByUser?()
             return
         }
 
-        let content = ActivityContent(state: state, staleDate: nil)
         if let activity, activity.activityState == .active {
             Task {
                 await activity.update(content)
@@ -130,15 +50,29 @@ final class LiveActivityController {
         }
 
         end()
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
-            return
-        }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         do {
-            let newActivity = try Activity.request(attributes: attributes, content: content, pushType: nil)
+            let newActivity = try Activity.request(
+                attributes: DingLoopActivityAttributes(),
+                content: content,
+                pushType: nil
+            )
             activity = newActivity
             observe(newActivity)
         } catch {
             print("Failed to start DingLoop Live Activity: \(error)")
+        }
+    }
+
+    /// Ends the activities showing right now. Ones started after this call are left alone.
+    func end() {
+        let showing = Activity<DingLoopActivityAttributes>.activities
+        activity = nil
+        for activity in showing {
+            let finalContent = activity.content
+            Task {
+                await activity.end(finalContent, dismissalPolicy: .immediate)
+            }
         }
     }
 

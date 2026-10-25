@@ -69,10 +69,16 @@ private enum AppLanguage {
         }
     }
 
-    var liveModeTitle: String {
-        switch self {
-        case .korean: "라이브모드"
-        case .english: "Live Mode"
+    func hintText(_ hint: LoopHint) -> String {
+        switch (self, hint) {
+        case (.korean, .lowVolume): "미디어 볼륨이 낮아요"
+        case (.english, .lowVolume): "Media volume is low"
+        case (.korean, .holdToRecord): "Voice를 길게 눌러 녹음하세요"
+        case (.english, .holdToRecord): "Hold Voice to record"
+        case (.korean, .recording): "녹음 중 · 손을 떼면 저장돼요"
+        case (.english, .recording): "Recording · release to save"
+        case (.korean, .recordingTooShort): "조금 더 길게 눌러 녹음하세요"
+        case (.english, .recordingTooShort): "Hold a little longer to record"
         }
     }
 }
@@ -148,29 +154,6 @@ struct ContentView: View {
                 }
 
             Spacer()
-
-            Button {
-                withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
-                    viewModel.toggleRunMode()
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    if viewModel.runMode == .live {
-                        Text(selectedLanguage.liveModeTitle)
-                            .font(.paper(.bold, size: 11))
-                            .foregroundStyle(Color.ampText.opacity(0.72))
-                            .transition(.move(edge: .trailing).combined(with: .opacity))
-                    }
-
-                    Rectangle()
-                        .fill(viewModel.runMode == .live ? Color.ampText : accentColor)
-                        .frame(width: 13, height: 13)
-                        .shadow(color: accentColor.opacity(0.22), radius: 8, y: 5)
-                        .rotationEffect(.degrees(viewModel.runMode == .live ? 45 : 0))
-                }
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(viewModel.runMode == .live ? "Switch to stop mode" : "Switch to live mode")
         }
     }
 
@@ -419,38 +402,46 @@ struct ContentView: View {
             [
                 (
                     "DingLoop",
-                    "DingLoop는 여러가지 알람을 루프 형식으로 반복해서 사용할 수 있는 앱입니다."
+                    "DingLoop는 여러 알람 소리를 정한 순서대로 계속 반복해 주는 앱입니다. 화면이 꺼지거나 다른 앱을 쓰는 중에도, 멈출 때까지 중단 없이 이어집니다."
                 ),
                 (
-                    "1. 기본모드와 라이브모드",
-                    "화면 오른쪽 상단의 점으로 모드를 전환합니다.\n\n'기본모드'는 일반적인 알람처럼 잠금화면, 집중모드, 수면모드, 백그라운드, 앱 열림시 모두 알람이 뜨며 중단 버튼을 눌러야만 다음 루프로 진행됩니다.\n\n'라이브모드'는 앱이 열려있는 상태에서만 가능하며, 라이브모드에서는 중단 버튼 없이 알람 루프가 진행됩니다. 또한 목소리를 녹음하여 알람으로 사용할 수도 있습니다."
+                    "1. 시작과 정지",
+                    "작고 동그란 핸들을 돌려 간격을 정하고, 가운데 숫자를 꾹 눌러 시작하거나 멈춥니다. 두 번 탭하면 일시정지합니다. 분/초 단위는 설정에서 고를 수 있고, 한 바퀴는 60단위, 최대 360단위입니다."
                 ),
                 (
-                    "2. 플레이 및 정지",
-                    "설정에서 시간 단위를 분 또는 초로 고를 수 있습니다. 작고 동그란 핸들을 돌려 시간을 설정한 뒤, 가운데 숫자를 꾹 눌러 플레이 및 정지를 작동시킵니다. 한 바퀴당 60단위, 최대 360단위까지 가능합니다."
+                    "2. 루프 등록",
+                    "하단의 소리 버튼을 탭하면 미리 들을 수 있고, 오른쪽 루프박스로 끌어다 놓으면 그 순서대로 반복됩니다. 소리마다 간격을 따로 정할 수 있습니다. 루프가 도는 동안에는 바꿀 수 없으니, 멈춘 뒤 수정해 주세요."
                 ),
                 (
-                    "3. 루프 등록",
-                    "화면 하단에는 색상으로 구분된 알람 소리 버튼이 있습니다. 이를 드래그하여 오른쪽 루프박스에 등록할 수 있습니다. 루프박스에 등록된 순서대로 알람은 계속 반복됩니다."
+                    "3. 목소리 녹음",
+                    "Voice 버튼을 길게 누르는 동안 녹음되고, 손을 떼면 저장됩니다(최대 10초). 저장한 목소리도 다른 소리처럼 루프에 넣을 수 있습니다."
+                ),
+                (
+                    "4. 알아두세요",
+                    "소리는 벨소리가 아닌 미디어 볼륨을 따릅니다. 무음 모드에서도 울리지만 미디어 볼륨이 0이면 들리지 않습니다. 이어폰이 연결되어 있으면 이어폰으로 나옵니다. 루프 중에는 배터리를 조금 더 사용합니다. 앱을 완전히 종료하거나, 잠금화면의 DingLoop 표시를 밀어서 지우면 루프도 멈춥니다."
                 )
             ]
         case .english:
             [
                 (
                     "DingLoop",
-                    "DingLoop lets you repeat multiple alarms in a loop."
+                    "DingLoop plays your alarm sounds over and over in the order you set. It keeps going while the screen is off or you use other apps, until you stop it."
                 ),
                 (
-                    "1. Stop Mode and Live Mode",
-                    "Switch modes with the dot at the top right of the screen.\n\n'Stop Mode' works like a standard alarm. The alarm appears on the Lock Screen, in Focus mode, Sleep mode, background, and while the app is open. You must press Stop to move to the next loop.\n\n'Live Mode' works only while the app is open. In Live Mode, the alarm loop continues without pressing Stop. You can also record your voice and use it as an alarm sound."
+                    "1. Start and Stop",
+                    "Turn the small round handle to set the interval, then press and hold the center number to start or stop. Double-tap to pause. Choose minutes or seconds in Settings. One full turn is 60 units, up to 360."
                 ),
                 (
-                    "2. Play and Stop",
-                    "Choose minutes or seconds in Settings. Turn the small circular handle to set the time, then press and hold the center number to play or stop. One full turn equals 60 units, up to 360 units."
+                    "2. Building a Loop",
+                    "Tap a sound button at the bottom to preview it, and drag it into the loop box on the right to repeat it in that order. Each sound keeps its own interval. The loop can't be changed while it runs, so stop it first."
                 ),
                 (
-                    "3. Registering Loops",
-                    "At the bottom of the screen, alarm sounds are shown as color-coded buttons. Drag them into the loop box on the right. Alarms repeat in the order registered in the loop box."
+                    "3. Recording Your Voice",
+                    "Press and hold the Voice button to record, and release to save (up to 10 seconds). Your voice can join the loop like any other sound."
+                ),
+                (
+                    "4. Good to Know",
+                    "Sounds follow media volume, not ringer volume. They play in Silent mode, but not with media volume at zero. With earphones connected, they play through the earphones. Looping uses a little more battery. Quitting the app, or swiping away DingLoop on the Lock Screen, stops the loop."
                 )
             ]
         }
@@ -505,7 +496,6 @@ struct ContentView: View {
     private var controlDock: some View {
         HStack(spacing: 10) {
             toneControls
-            .frame(maxWidth: .infinity)
             .padding(.horizontal, 8)
             .padding(.vertical, 8)
             .background(Color.black.opacity(0.22), in: Capsule())
@@ -518,118 +508,67 @@ struct ContentView: View {
                 insertAction: viewModel.insertToneToSequence
             )
             .frame(maxWidth: .infinity)
+            .allowsHitTesting(!viewModel.isRunning)
         }
+        .overlay(alignment: .top) {
+            hintBubble
+                .offset(y: -122)
+        }
+        .animation(.spring(response: 0.26, dampingFraction: 0.84), value: viewModel.hint)
         .padding(12)
         .background(Color.ampPanel.opacity(0.96), in: Capsule())
         .shadow(color: .black.opacity(0.38), radius: 22, y: 14)
     }
 
-    @ViewBuilder
+    /// Ding, Pop, Chime and Voice, always in the same place.
+    /// Tap: select and preview. Drag: add to the loop box. Hold Voice: record.
+    /// Frozen while a loop runs.
     private var toneControls: some View {
-        ZStack {
-            liveToneControls
-                .opacity(viewModel.runMode == .live ? 1 : 0)
-                .allowsHitTesting(viewModel.runMode == .live)
-
-            stopToneControls
-                .opacity(viewModel.runMode == .stop ? 1 : 0)
-                .allowsHitTesting(viewModel.runMode == .stop)
-        }
-        .transaction { transaction in
-            transaction.animation = nil
-        }
-    }
-
-    private var liveToneControls: some View {
-        HStack(spacing: 8) {
-            ToneChip(tone: viewModel.alarmTone == .voice ? .ding : viewModel.alarmTone, isSelected: viewModel.alarmTone != .voice) {
-                viewModel.cycleAlarmTone()
-            }
-            .simultaneousGesture(fastToneDragGesture(for: viewModel.alarmTone == .voice ? .ding : viewModel.alarmTone))
-
-            Button {
-                viewModel.handleVoiceButtonTap()
-            } label: {
-                Circle()
-                    .fill(voiceButtonFill)
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: voiceButtonIcon)
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(Color.black.opacity(0.82))
-                    )
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white.opacity(viewModel.isVoiceRecordArmed || viewModel.isRecordingVoice ? 0.95 : 0), lineWidth: 2)
-                    )
-                    .shadow(
-                        color: voiceButtonFill.opacity(viewModel.isRecordingVoice ? 0.5 : 0.22),
-                        radius: viewModel.isRecordingVoice ? 12 : 8,
-                        y: 6
-                    )
-            }
-            .buttonStyle(.plain)
-            .simultaneousGesture(fastToneDragGesture(for: .voice))
-
-            Button {
-                viewModel.previewSelectedSound()
-            } label: {
-                Circle()
-                    .fill(Color.ampPanel)
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(Color.ampText.opacity(0.82))
-                    )
-            }
-            .buttonStyle(.plain)
-        }
-        .animation(.spring(response: 0.24, dampingFraction: 0.78), value: viewModel.isVoiceRecordArmed)
-        .animation(.spring(response: 0.24, dampingFraction: 0.78), value: viewModel.isRecordingVoice)
-    }
-
-    private var stopToneControls: some View {
-        HStack(spacing: 8) {
-            ForEach(AlarmTone.builtInCases) { tone in
+        HStack(spacing: 6) {
+            ForEach([AlarmTone.ding, .pop, .chime], id: \.self) { tone in
                 ToneChip(tone: tone, isSelected: tone == viewModel.alarmTone) {
                     viewModel.selectAlarmTone(tone)
-                    viewModel.previewDefaultSound()
                 }
                 .simultaneousGesture(fastToneDragGesture(for: tone))
             }
 
-            // A recorded voice can also ring through AlarmKit in stop mode.
-            if viewModel.hasVoiceRecording {
-                ToneChip(tone: .voice, isSelected: viewModel.alarmTone == .voice) {
-                    viewModel.selectAlarmTone(.voice)
-                    viewModel.previewDefaultSound()
-                }
-                .simultaneousGesture(fastToneDragGesture(for: .voice))
-            }
+            VoiceChip(
+                hasRecording: viewModel.hasVoiceRecording,
+                isSelected: viewModel.alarmTone == .voice,
+                isRecording: viewModel.isRecordingVoice,
+                onTap: { viewModel.selectAlarmTone(.voice) },
+                onPressStart: { viewModel.voicePressBegan() },
+                onHoldStart: { viewModel.beginHoldRecording() },
+                onHoldEnd: { viewModel.endHoldRecording() }
+            )
+            .simultaneousGesture(fastToneDragGesture(for: .voice))
         }
+        .fixedSize()
+        .opacity(viewModel.isRunning ? 0.42 : 1)
+        .allowsHitTesting(!viewModel.isRunning)
+        .animation(.easeOut(duration: 0.18), value: viewModel.isRunning)
     }
 
-    private var voiceButtonFill: Color {
-        if viewModel.isRecordingVoice {
-            return .ampRed
+    @ViewBuilder
+    private var hintBubble: some View {
+        if let hint = viewModel.hint {
+            Text(selectedLanguage.hintText(hint))
+                .font(.paper(.semiBold, size: 13))
+                .foregroundStyle(hint == .recording ? Color.black : Color.ampText)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(hint == .recording ? Color.ampRed : Color.ampPanel, in: Capsule())
+                .shadow(color: .black.opacity(0.36), radius: 14, y: 8)
+                .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                .allowsHitTesting(false)
         }
-        return Color.ampText.opacity(viewModel.hasVoiceRecording || viewModel.isVoiceRecordArmed ? 0.9 : 0.34)
-    }
-
-    private var voiceButtonIcon: String {
-        if viewModel.isRecordingVoice {
-            return "stop.fill"
-        }
-        if viewModel.isVoiceRecordArmed {
-            return "record.circle.fill"
-        }
-        return "waveform"
     }
 
     private func fastToneDragGesture(for tone: AlarmTone) -> some Gesture {
         DragGesture(minimumDistance: 4, coordinateSpace: .named("DingLoopDragSpace"))
             .onChanged { value in
+                guard !viewModel.isRunning, !viewModel.isRecordingVoice else { return }
+                guard tone != .voice || viewModel.hasVoiceRecording else { return }
                 draggingTone = tone
                 dragLocation = value.location
                 updateLoopHover(at: value.location)
@@ -640,7 +579,7 @@ struct ContentView: View {
                     loopHoverIndex = nil
                 }
 
-                guard loopLaneFrame.contains(value.location) else { return }
+                guard draggingTone != nil, loopLaneFrame.contains(value.location) else { return }
                 viewModel.insertToneToSequence(tone, at: loopInsertIndex(for: value.location))
             }
     }
@@ -1026,10 +965,10 @@ struct ToneChip: View {
         Button(action: action) {
             Circle()
                 .fill(tone.tint)
-                .frame(width: 40, height: 40)
+                .frame(width: 36, height: 36)
                 .overlay(
                     Image(systemName: tone.systemName)
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.black.opacity(0.8))
                 )
                 .overlay(
@@ -1039,6 +978,47 @@ struct ToneChip: View {
                 .shadow(color: tone.tint.opacity(0.28), radius: 10, y: 6)
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// The Voice chip. Tap selects and previews the recording; holding it records
+/// (release to save, up to 10 seconds).
+struct VoiceChip: View {
+    var hasRecording: Bool
+    var isSelected: Bool
+    var isRecording: Bool
+    var onTap: () -> Void
+    var onPressStart: () -> Void
+    var onHoldStart: () -> Void
+    var onHoldEnd: () -> Void
+
+    var body: some View {
+        Circle()
+            .fill(isRecording ? Color.ampRed : AlarmTone.voice.tint.opacity(hasRecording ? 1 : 0.38))
+            .frame(width: 36, height: 36)
+            .overlay(
+                Image(systemName: hasRecording || isRecording ? AlarmTone.voice.systemName : "mic.fill")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.black.opacity(0.8))
+            )
+            .overlay(
+                Circle()
+                    .stroke(Color.white.opacity(isSelected || isRecording ? 0.95 : 0.28), lineWidth: isSelected || isRecording ? 2 : 1)
+            )
+            .scaleEffect(isRecording ? 1.14 : 1)
+            .shadow(color: (isRecording ? Color.ampRed : AlarmTone.voice.tint).opacity(isRecording ? 0.6 : 0.28), radius: isRecording ? 14 : 10, y: 6)
+            .animation(.spring(response: 0.24, dampingFraction: 0.7), value: isRecording)
+            .contentShape(Circle())
+            .onTapGesture(perform: onTap)
+            .onLongPressGesture(minimumDuration: 0.35, maximumDistance: 40, perform: onHoldStart) { isPressing in
+                if isPressing {
+                    onPressStart()
+                } else {
+                    onHoldEnd()
+                }
+            }
+            .accessibilityLabel("Voice")
+            .accessibilityHint("Hold to record")
     }
 }
 
