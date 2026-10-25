@@ -503,6 +503,7 @@ struct ContentView: View {
             SequenceLane(
                 sequence: viewModel.alarmSequence,
                 selectedTone: viewModel.alarmTone,
+                activeIndex: viewModel.activeLoopIndex,
                 hoverIndex: $loopHoverIndex,
                 removeAction: viewModel.removeSequenceItem,
                 insertAction: viewModel.insertToneToSequence
@@ -567,8 +568,14 @@ struct ContentView: View {
     private func fastToneDragGesture(for tone: AlarmTone) -> some Gesture {
         DragGesture(minimumDistance: 4, coordinateSpace: .named("DingLoopDragSpace"))
             .onChanged { value in
-                guard !viewModel.isRunning, !viewModel.isRecordingVoice else { return }
-                guard tone != .voice || viewModel.hasVoiceRecording else { return }
+                guard !viewModel.isRunning else { return }
+                if tone == .voice {
+                    // Holding Voice to drag it must not leave a recording behind.
+                    viewModel.cancelVoicePress()
+                    guard viewModel.hasVoiceRecording else { return }
+                } else if viewModel.isRecordingVoice {
+                    return
+                }
                 draggingTone = tone
                 dragLocation = value.location
                 updateLoopHover(at: value.location)
@@ -1025,6 +1032,8 @@ struct VoiceChip: View {
 struct SequenceLane: View {
     var sequence: [AlarmTone]
     var selectedTone: AlarmTone
+    /// While a loop plays: the slot that is counting down now.
+    var activeIndex: Int?
     @Binding var hoverIndex: Int?
     var removeAction: (Int) -> Void
     var insertAction: (AlarmTone, Int) -> Void
@@ -1108,15 +1117,29 @@ struct SequenceLane: View {
     }
 
     private func sequenceItem(tone: AlarmTone, index: Int, width: CGFloat) -> some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(tone.tint.opacity(tone == selectedTone ? 0.94 : 0.68))
+        let isActive = activeIndex == index
+        let fillOpacity: Double = if let activeIndex {
+            index == activeIndex ? 1 : 0.32
+        } else {
+            tone == selectedTone ? 0.94 : 0.68
+        }
+
+        return RoundedRectangle(cornerRadius: 8)
+            .fill(tone.tint.opacity(fillOpacity))
             .frame(width: width, height: 34)
             .overlay(
                 Text("\(index + 1)")
                     .font(.paper(.bold, size: 12))
-                    .foregroundStyle(.black.opacity(0.85))
+                    .foregroundStyle(.black.opacity(isActive || activeIndex == nil ? 0.85 : 0.5))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.white.opacity(isActive ? 0.95 : 0), lineWidth: 2)
+            )
+            .scaleEffect(isActive ? 1.06 : 1)
+            .shadow(color: tone.tint.opacity(isActive ? 0.55 : 0), radius: 8)
+            .animation(.spring(response: 0.3, dampingFraction: 0.75), value: activeIndex)
     }
 }
 

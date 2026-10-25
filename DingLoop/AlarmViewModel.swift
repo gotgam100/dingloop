@@ -93,6 +93,8 @@ final class AlarmViewModel: ObservableObject {
     @Published var isRecordingVoice = false
     @Published var hasVoiceRecording = false
     @Published private(set) var hint: LoopHint?
+    /// The loop box slot whose tone is counting down now (nil when stopped).
+    @Published private(set) var activeLoopIndex: Int?
 
     private static let selectedToneKey = "DingLoop.selectedTone"
     private static let timeUnitKey = "DingLoop.timeUnit"
@@ -175,6 +177,7 @@ final class AlarmViewModel: ObservableObject {
         timer = nil
         toneEndDate = nil
         loopTones = []
+        activeLoopIndex = nil
         isRunning = false
         isPaused = false
         currentLoopNumber = 1
@@ -205,6 +208,7 @@ final class AlarmViewModel: ObservableObject {
     /// Shows the tone at `loopIndex` on the dial and starts its interval at `start`.
     private func beginCurrentTone(from start: Date) {
         let tone = loopTones[loopIndex]
+        activeLoopIndex = loopIndex
         alarmTone = tone
         Self.storeAlarmTone(tone)
         intervalMinutes = Self.storedInterval(for: tone)
@@ -361,6 +365,14 @@ final class AlarmViewModel: ObservableObject {
         } else {
             discardRecording()
         }
+    }
+
+    /// The Voice chip started moving: it is being dragged into the loop box, not recorded.
+    func cancelVoicePress() {
+        guard recordingStartedAt != nil else { return }
+        isRecordingVoice = false
+        clearHint()
+        discardRecording()
     }
 
     private func discardRecording() {
