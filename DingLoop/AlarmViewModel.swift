@@ -566,7 +566,7 @@ final class AlarmViewModel: ObservableObject {
             decay = 4.2
             gain = 0.58
         case .beep:
-            // Placeholder until a recorded beep sound is added.
+            // Fallback only; the bundled beep-tone.caf is used.
             duration = 0.22
             frequencies = [(1320, 1.0)]
             decay = 3.0

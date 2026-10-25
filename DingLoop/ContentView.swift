@@ -111,8 +111,6 @@ struct ContentView: View {
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
-    /// Design trial: chips on one row and the loop box on the row below.
-    private let usesTwoRowDock = true
     private let legalPageURL = URL(string: "https://gotgam100.github.io/dingloop/index.html")!
 
     var body: some View {
@@ -184,7 +182,7 @@ struct ContentView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: usesTwoRowDock ? 6 : 18)
+            Spacer(minLength: 6)
 
             ClockDial(
                 intervalMinutes: $viewModel.intervalMinutes,
@@ -208,11 +206,11 @@ struct ContentView: View {
 
             quickIntervals
                 .padding(.horizontal, 26)
-                .padding(.bottom, usesTwoRowDock ? 14 : 18)
+                .padding(.bottom, 14)
 
             controlDock
                 .padding(.horizontal, 22)
-                .padding(.bottom, usesTwoRowDock ? 30 : 22)
+                .padding(.bottom, 30)
         }
     }
 
@@ -431,20 +429,24 @@ struct ContentView: View {
                     "DingLoop는 여러 알람 소리를 정한 순서대로 계속 반복해 주는 앱입니다. 화면이 꺼지거나 다른 앱을 쓰는 중에도, 멈출 때까지 중단 없이 이어집니다."
                 ),
                 (
-                    "1. 시작과 정지",
-                    "작고 동그란 핸들을 돌려 간격을 정합니다. 루프박스 오른쪽의 ▶ 버튼을 누르면 1번 칸부터 순서대로 시작하고, ■를 누르면 멈춥니다. 가운데 숫자를 꾹 눌러도 시작하거나 멈출 수 있고, 두 번 탭하면 일시정지합니다. 분/초 단위는 오른쪽 위 설정에서 고를 수 있고, 한 바퀴는 60단위, 최대 360단위입니다."
+                    "1. 간격 정하기",
+                    "소리 버튼을 탭해 고른 뒤, 작고 동그란 핸들을 돌리거나 아래 숫자 버튼을 눌러 간격을 정합니다. 소리마다 간격이 따로 저장됩니다. 분/초 단위는 오른쪽 위 설정에서 고를 수 있고, 한 바퀴는 60단위, 최대 360단위입니다."
                 ),
                 (
-                    "2. 루프 등록",
-                    "윗줄의 소리 버튼을 탭하면 미리 들을 수 있고, 아랫줄 루프박스로 끌어다 놓으면 그 순서대로 반복됩니다(최대 4개). 루프박스의 칸을 탭하면 뺄 수 있고, 소리마다 간격을 따로 정할 수 있습니다. 루프가 도는 동안에는 지금 울릴 칸이 표시되며, 바꿀 수 없으니 멈춘 뒤 수정해 주세요."
+                    "2. 루프 만들기",
+                    "윗줄의 소리 버튼(Ding, Pop, Chime, Beep, Voice)을 아랫줄 루프박스로 끌어다 놓으면, 놓은 순서대로 반복됩니다. 최대 4개까지 넣을 수 있고, 루프박스의 칸을 탭하면 뺄 수 있습니다."
                 ),
                 (
-                    "3. 목소리 녹음",
-                    "Voice 버튼을 길게 누르는 동안 녹음되고, 손을 떼면 저장됩니다(최대 10초). 저장한 목소리도 다른 소리처럼 루프에 넣을 수 있습니다."
+                    "3. 시작과 정지",
+                    "루프박스 오른쪽의 ▶ 버튼을 누르면 1번 칸부터 순서대로 시작하고, ■를 누르면 멈춥니다. 가운데 숫자를 꾹 눌러도 시작하거나 멈출 수 있으며, 이때는 지금 고른 소리의 칸부터 시작합니다. 가운데 숫자를 두 번 탭하면 일시정지합니다. 루프가 도는 동안에는 지금 울릴 칸이 표시되고, 소리 버튼과 루프박스는 바꿀 수 없습니다."
                 ),
                 (
-                    "4. 알아두세요",
-                    "소리는 벨소리가 아닌 미디어 볼륨을 따릅니다. 무음 모드에서도 울리지만 미디어 볼륨이 0이면 들리지 않습니다. 이어폰이 연결되어 있으면 이어폰으로 나옵니다. 루프 중에는 배터리를 조금 더 사용합니다. 앱을 완전히 종료하거나, 잠금화면의 DingLoop 표시를 밀어서 지우면 루프도 멈춥니다."
+                    "4. 목소리 녹음",
+                    "Voice 버튼을 길게 누르는 동안 녹음되고, 손을 떼면 저장됩니다(최대 10초). 길게 누른 채 루프박스로 끌면 녹음하지 않고 루프에 넣습니다. 저장한 목소리도 다른 소리처럼 루프에 넣을 수 있습니다."
+                ),
+                (
+                    "5. 알아두세요",
+                    "소리는 벨소리가 아닌 미디어 볼륨을 따릅니다. 무음 모드에서도 울리지만 미디어 볼륨이 0이면 들리지 않습니다. 이어폰이 연결되어 있으면 이어폰으로 나옵니다. 루프 중에는 배터리를 조금 더 사용합니다. 잠금화면의 DingLoop 표시를 밀어서 지우거나 앱을 완전히 종료하면 루프도 멈춥니다."
                 )
             ]
         case .english:
@@ -454,20 +456,24 @@ struct ContentView: View {
                     "DingLoop plays your alarm sounds over and over in the order you set. It keeps going while the screen is off or you use other apps, until you stop it."
                 ),
                 (
-                    "1. Start and Stop",
-                    "Turn the small round handle to set the interval. Tap ▶ beside the loop box to start from the first slot, and ■ to stop. You can also press and hold the center number to start or stop, and double-tap it to pause. Choose minutes or seconds in Settings (top right). One full turn is 60 units, up to 360."
+                    "1. Setting the Interval",
+                    "Tap a sound button to choose it, then turn the small round handle or tap a number button to set its interval. Each sound keeps its own interval. Choose minutes or seconds in Settings (top right). One full turn is 60 units, up to 360."
                 ),
                 (
                     "2. Building a Loop",
-                    "Tap a sound button in the top row to preview it, and drag it into the loop box below to repeat it in that order (up to 4). Tap a slot to remove it. Each sound keeps its own interval. While the loop runs, the slot that plays next is highlighted; stop the loop to change it."
+                    "Drag sound buttons from the top row (Ding, Pop, Chime, Beep, Voice) into the loop box below; they repeat in the order you place them. The loop box holds up to 4 sounds. Tap a slot to remove it."
                 ),
                 (
-                    "3. Recording Your Voice",
-                    "Press and hold the Voice button to record, and release to save (up to 10 seconds). Your voice can join the loop like any other sound."
+                    "3. Start and Stop",
+                    "Tap ▶ beside the loop box to start from the first slot, and ■ to stop. You can also press and hold the center number to start or stop; this starts from the slot of the sound you have chosen. Double-tap the center number to pause. While the loop runs, the slot that plays next is highlighted, and the sound buttons and loop box can't be changed."
                 ),
                 (
-                    "4. Good to Know",
-                    "Sounds follow media volume, not ringer volume. They play in Silent mode, but not with media volume at zero. With earphones connected, they play through the earphones. Looping uses a little more battery. Quitting the app, or swiping away DingLoop on the Lock Screen, stops the loop."
+                    "4. Recording Your Voice",
+                    "Press and hold the Voice button to record, and release to save (up to 10 seconds). Hold and drag it into the loop box to add it without recording. Your voice can join the loop like any other sound."
+                ),
+                (
+                    "5. Good to Know",
+                    "Sounds follow media volume, not ringer volume. They play in Silent mode, but not with media volume at zero. With earphones connected, they play through the earphones. Looping uses a little more battery. Swiping away DingLoop on the Lock Screen, or quitting the app, stops the loop."
                 )
             ]
         }
@@ -542,15 +548,6 @@ struct ContentView: View {
         }
     }
 
-    @ViewBuilder
-    private var controlDock: some View {
-        if usesTwoRowDock {
-            twoRowDock
-        } else {
-            oneRowDock
-        }
-    }
-
     private var loopLane: some View {
         SequenceLane(
             emptyTitle: selectedLanguage.emptyLoopTitle,
@@ -565,27 +562,8 @@ struct ContentView: View {
         .allowsHitTesting(!viewModel.isRunning)
     }
 
-    private var oneRowDock: some View {
-        HStack(spacing: 10) {
-            toneControls(chipSize: 36, spacing: 6)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 8)
-                .background(Color.black.opacity(0.22), in: Capsule())
-
-            loopLane
-        }
-        .overlay(alignment: .top) {
-            hintBubble
-                .offset(y: -122)
-        }
-        .animation(.spring(response: 0.26, dampingFraction: 0.84), value: viewModel.hint)
-        .padding(12)
-        .background(Color.ampPanel.opacity(0.96), in: Capsule())
-        .shadow(color: .black.opacity(0.38), radius: 22, y: 14)
-    }
-
-    /// Chips on the first row, the loop box on the second.
-    private var twoRowDock: some View {
+    /// Chips on the first row; the loop box and its play button on the second.
+    private var controlDock: some View {
         VStack(spacing: 12) {
             toneControls(chipSize: 46, spacing: 14)
                 .frame(maxWidth: .infinity)

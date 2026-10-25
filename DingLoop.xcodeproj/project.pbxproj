@@ -21,6 +21,7 @@
 		AA0012010000000000000001 /* ding-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024010000000000000001 /* ding-tone.caf */; };
 		AA0012020000000000000001 /* pop-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024020000000000000001 /* pop-tone.caf */; };
 		AA0012030000000000000001 /* chime-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024030000000000000001 /* chime-tone.caf */; };
+		AA0012070000000000000001 /* beep-tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = AA0024070000000000000001 /* beep-tone.caf */; };
 		AA0013010000000000000001 /* DingLoopLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0025010000000000000001 /* DingLoopLiveActivityBundle.swift */; };
 		AA0013020000000000000001 /* DingLoopLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0025020000000000000001 /* DingLoopLiveActivityWidget.swift */; };
 		AA0013030000000000000001 /* DingLoopActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020070000000000000001 /* DingLoopActivityAttributes.swift */; };
@@ -70,6 +71,7 @@
 		AA0024010000000000000001 /* ding-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ding-tone.caf"; sourceTree = "<group>"; };
 		AA0024020000000000000001 /* pop-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "pop-tone.caf"; sourceTree = "<group>"; };
 		AA0024030000000000000001 /* chime-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "chime-tone.caf"; sourceTree = "<group>"; };
+		AA0024070000000000000001 /* beep-tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "beep-tone.caf"; sourceTree = "<group>"; };
 		AA0025010000000000000001 /* DingLoopLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopLiveActivityBundle.swift; sourceTree = "<group>"; };
 		AA0025020000000000000001 /* DingLoopLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DingLoopLiveActivityWidget.swift; sourceTree = "<group>"; };
 		AA0025030000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				AA0024010000000000000001 /* ding-tone.caf */,
 				AA0024020000000000000001 /* pop-tone.caf */,
 				AA0024030000000000000001 /* chime-tone.caf */,
+				AA0024070000000000000001 /* beep-tone.caf */,
 			);
 			path = Sounds;
 			sourceTree = "<group>";
@@ -253,6 +256,7 @@
 				AA0012010000000000000001 /* ding-tone.caf in Resources */,
 				AA0012020000000000000001 /* pop-tone.caf in Resources */,
 				AA0012030000000000000001 /* chime-tone.caf in Resources */,
+				AA0012070000000000000001 /* beep-tone.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
